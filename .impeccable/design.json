@@ -1,32 +1,31 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-20T20:00:00-05:00",
+  "generatedAt": "2026-10-20T21:00:00-05:00",
   "title": "Design System: TEZAN",
   "extensions": {
     "colorMeta": {
-      "marble-black": { "role": "primary", "displayName": "Mármol negro" },
-      "marble-black-soft": { "role": "neutral", "displayName": "Mármol negro pulido" },
-      "marble-white": { "role": "neutral", "displayName": "Mármol blanco" },
-      "marble-white-deep": { "role": "neutral", "displayName": "Mármol blanco en sombra" },
-      "vein": { "role": "neutral", "displayName": "Veta" },
-      "vein-light": { "role": "neutral", "displayName": "Veta clara" },
-      "surface": { "role": "neutral", "displayName": "Superficie" }
+      "ink": { "role": "primary", "displayName": "Tinta" },
+      "paper": { "role": "neutral", "displayName": "Papel" },
+      "warm": { "role": "neutral", "displayName": "Gris cálido" },
+      "warm-deep": { "role": "neutral", "displayName": "Gris cálido profundo" },
+      "muted": { "role": "neutral", "displayName": "Apagado" },
+      "line": { "role": "neutral", "displayName": "Línea" },
+      "field-border": { "role": "neutral", "displayName": "Borde de campo" }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Solo la palabra TEZAN en la portada." },
-      "heading": { "displayName": "Títulos", "purpose": "h1 a h3 y la frase de marca; siempre en peso 400." },
-      "body": { "displayName": "Texto", "purpose": "Todo el texto de interfaz, en tipo oración." },
-      "price": { "displayName": "Precio", "purpose": "Precios con cifras tabulares." }
+      "logo": { "displayName": "Logo", "purpose": "TEZAN en cabecera, menú y pie." },
+      "campaign": { "displayName": "Campaña", "purpose": "Titular del banner y títulos de sección." },
+      "label": { "displayName": "Etiqueta", "purpose": "Navegación, botones, nombres de prenda; mayúsculas pequeñas." },
+      "body": { "displayName": "Texto", "purpose": "Párrafos, formularios y ayudas." }
     },
     "shadows": [],
     "motion": [
-      { "name": "tz-ease", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Transiciones de estado y el asentamiento de baldosas." },
-      { "name": "tz-lay", "value": "0.7s, retraso de 55ms por paso diagonal", "purpose": "Único momento de movimiento: las baldosas del primer viewport se asientan al cargar; desactivado con prefers-reduced-motion." }
+      { "name": "tz-ease", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Zoom lento de los banners de categoría al pasar el cursor." },
+      { "name": "photo-swap", "value": "opacity 0.3s ease-in-out", "purpose": "Cambio de foto en la grilla al mover el cursor." }
     ],
     "breakpoints": [
       { "name": "md", "value": "768px" },
-      { "name": "lg", "value": "992px" },
-      { "name": "xl", "value": "1200px" }
+      { "name": "lg", "value": "992px" }
     ]
   },
   "components": [
@@ -34,45 +33,44 @@
       "name": "Botón principal",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Acción principal: agregar a la bolsa, ir a pagar.",
-      "html": "<button class=\"ds-btn\">Agregar a la bolsa</button>",
-      "css": ".ds-btn { background:#141413; color:#f2f2ef; border:0; border-radius:0; padding:16px 24px; font:600 16px 'Hanken Grotesk Variable', sans-serif; } .ds-btn:hover { background:#000; }"
+      "description": "Añadir a la bolsa, ir a pagar.",
+      "html": "<button class=\"ds-btn\">Añadir a la bolsa</button>",
+      "css": ".ds-btn { background:#111; color:#fff; border:0; border-radius:0; padding:14px 24px; font:600 13px 'Hanken Grotesk Variable', sans-serif; letter-spacing:.08em; text-transform:uppercase; } .ds-btn:hover { background:#000; }"
     },
     {
-      "name": "Baldosa de elección",
+      "name": "Opción de talla",
       "kind": "chip",
-      "refersTo": "choice-tile",
-      "description": "Talla o color elegible; la elegida es la más oscura.",
+      "refersTo": "choice",
+      "description": "Talla o color; la elegida se rellena de tinta.",
       "html": "<label class=\"ds-choice\"><input type=\"radio\" name=\"t\"><span>S</span></label><label class=\"ds-choice\"><input type=\"radio\" name=\"t\" checked><span>M</span></label>",
-      "css": ".ds-choice input { position:absolute; opacity:0; } .ds-choice span { display:inline-flex; align-items:center; justify-content:center; min-width:44px; height:44px; border:1px solid #141413; background:#fff; color:#141413; font:600 16px 'Hanken Grotesk Variable', sans-serif; margin-right:6px; } .ds-choice input:checked + span { background:#141413; color:#f2f2ef; }"
+      "css": ".ds-choice input { position:absolute; opacity:0; } .ds-choice span { display:inline-flex; align-items:center; justify-content:center; min-width:48px; height:44px; border:1px solid #b9b4ab; background:#fff; color:#111; font:400 14px 'Hanken Grotesk Variable', sans-serif; margin-right:6px; } .ds-choice input:checked + span { background:#111; border-color:#111; color:#fff; }"
     },
     {
-      "name": "Filtro de categoría",
-      "kind": "nav",
-      "refersTo": "filter-tile",
-      "description": "Franja de baldosas para filtrar el catálogo.",
-      "html": "<nav class=\"ds-strip\"><a class=\"on\">Todo</a><a>Polos</a><a>Conjuntos</a></nav>",
-      "css": ".ds-strip { display:flex; gap:2px; } .ds-strip a { padding:12px 18px; background:#e4e3de; color:#141413; font:500 16px 'Hanken Grotesk Variable', sans-serif; } .ds-strip a.on { background:#141413; color:#f2f2ef; }"
+      "name": "Tarjeta de prenda",
+      "kind": "card",
+      "refersTo": "",
+      "description": "Foto 3:4, nombre y precio.",
+      "html": "<a class=\"ds-card\"><div class=\"ds-img\"></div><span class=\"ds-name\">Polo Oversize</span><span>S/ 35.00</span></a>",
+      "css": ".ds-card { display:flex; flex-direction:column; gap:4px; width:220px; color:#111; font:400 14px 'Hanken Grotesk Variable', sans-serif; } .ds-img { aspect-ratio:3/4; background:#f3f2ef; margin-bottom:8px; } .ds-name { font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; }"
     },
     {
       "name": "Campo de texto",
       "kind": "input",
       "refersTo": "",
-      "description": "Campos de búsqueda y checkout.",
-      "html": "<input class=\"ds-input\" placeholder=\"Buscar prenda\">",
-      "css": ".ds-input { border:1px solid #141413; border-radius:0; background:#fff; padding:10px 12px; font:400 16px 'Hanken Grotesk Variable', sans-serif; } .ds-input:focus { outline:none; box-shadow:0 0 0 2px #141413; }"
+      "description": "Búsqueda y checkout.",
+      "html": "<input class=\"ds-input\" placeholder=\"¿Qué estás buscando?\">",
+      "css": ".ds-input { border:1px solid #b9b4ab; border-radius:0; padding:10px 12px; font:400 16px 'Hanken Grotesk Variable', sans-serif; } .ds-input:focus { outline:none; border-color:#111; box-shadow:0 0 0 1px #111; }"
     }
   ],
   "narrative": {
-    "northStar": "Damero limeño",
-    "overview": "La tienda se recorre como el piso de mármol blanco y negro de una casona limeña. Un único módulo de baldosa cuadrada ordena cada página y lo activo es siempre la baldosa más oscura.",
-    "keyCharacteristics": ["Retícula de baldosas cuadradas", "Solo blanco y negro de mármol", "Serif lapidaria monumental", "Tipo oración, sin mayúsculas forzadas", "Cenefa como borde del piso"],
+    "northStar": "La foto manda",
+    "overview": "E-commerce de moda clásico con Zara como referencia: campaña a todo el ancho, grilla de fotos verticales, interfaz blanca y negra que se retira.",
+    "keyCharacteristics": ["Fotografía protagonista", "Logo didona con tracking amplio", "Etiquetas de interfaz en mayúsculas pequeñas", "Esquinas rectas, sin sombras"],
     "rules": [
-      { "name": "La baldosa más oscura manda", "body": "Lo activo o seleccionado es la baldosa más oscura de su grupo.", "section": "colors" },
-      { "name": "Sin tercer color", "body": "No hay acento; el color solo vive en las fotos y las muestras de color.", "section": "colors" },
-      { "name": "Sin elevación", "body": "Nada de sombras ni líneas finas; se separa por tono, espacio o escala.", "section": "elevation" }
+      { "name": "La foto pone el color", "body": "La interfaz no lleva acento; el color viene de las fotos.", "section": "colors" },
+      { "name": "Mayúsculas solo de interfaz", "body": "Navegación, botones y etiquetas en mayúsculas pequeñas; nunca párrafos.", "section": "typography" }
     ],
-    "dos": ["Componer con el módulo de baldosa", "Usar Marcellus en peso 400", "Mostrar solo hechos confirmados"],
-    "donts": ["Acentos de color, degradados o sombras", "Rótulos en mayúsculas o eyebrows", "Vetas de mármol falsas en CSS"]
+    "dos": ["Fotos propias cuando existan", "Categorías, precio y bolsa siempre visibles"],
+    "donts": ["Blanco y negro plano", "Fondos crema o acentos de color", "Eyebrows sobre titulares"]
   }
 }

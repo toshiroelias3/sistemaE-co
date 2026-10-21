@@ -52,11 +52,10 @@
 
     <!-- Bolsa lateral -->
     <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="miniCartCanvas" aria-labelledby="miniCartCanvasLabel" style="width: min(420px, 100vw);">
-        <div class="offcanvas-header tz-ink py-3">
-            <h2 class="offcanvas-title h4 mb-0" id="miniCartCanvasLabel">Tu bolsa</h2>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+        <div class="offcanvas-header border-bottom py-3">
+            <h2 class="offcanvas-title tz-label mb-0" id="miniCartCanvasLabel">Tu bolsa</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
         </div>
-        <div class="tz-cenefa"></div>
         <div class="offcanvas-body d-flex flex-column" id="mini-cart-body">
             @include('shop.partials.mini-cart-items')
         </div>

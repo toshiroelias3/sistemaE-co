@@ -1,0 +1,318 @@
+// =============================================================
+// Tienda pública TEZAN (body.tz): e-commerce de moda clásico.
+// La fotografía manda; la interfaz es blanca, negra y un neutro
+// cálido, con esquinas rectas y sin sombras.
+// =============================================================
+
+.tz {
+    --tz-ink: #111111;
+    --tz-paper: #ffffff;
+    --tz-warm: #f3f2ef;        // gris cálido: fondos de foto y pie
+    --tz-warm-deep: #e6e4df;
+    --tz-muted: #6b6760;       // texto secundario (5.6:1 sobre blanco)
+    --tz-line: #e2ded7;
+    --tz-sale: #8c2f1b;        // reservado a mensajes de error/agotado
+    --tz-display: 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
+    --tz-sans: 'Hanken Grotesk Variable', 'Helvetica Neue', Arial, sans-serif;
+    --tz-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+    --bs-body-font-family: var(--tz-sans);
+    --bs-body-bg: var(--tz-paper);
+    --bs-body-color: var(--tz-ink);
+    --bs-secondary-color: var(--tz-muted);
+    --bs-border-color: var(--tz-line);
+    --bs-link-color-rgb: 17, 17, 17;
+    --bs-link-hover-color-rgb: 17, 17, 17;
+
+    background: var(--tz-paper);
+    color: var(--tz-ink);
+    accent-color: var(--tz-ink);
+    scrollbar-color: var(--tz-ink) var(--tz-warm);
+
+    ::selection { background: var(--tz-ink); color: var(--tz-paper); }
+
+    h1, h2, h3 { font-weight: 500; letter-spacing: -0.01em; text-wrap: balance; }
+
+    a { text-underline-offset: 0.2em; }
+
+    .text-muted, .text-secondary { color: var(--tz-muted) !important; }
+
+    .tz-price { font-variant-numeric: tabular-nums; }
+
+    // Etiquetas de interfaz en mayúsculas pequeñas, como en la referencia
+    .tz-label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .tz-display { font-family: var(--tz-display); font-weight: 400; letter-spacing: 0; }
+
+    :focus-visible { outline: 2px solid var(--tz-ink); outline-offset: 2px; box-shadow: none; }
+
+    .form-control, .form-select {
+        border-radius: 0;
+        border-color: #b9b4ab;
+        &:focus { border-color: var(--tz-ink); box-shadow: 0 0 0 1px var(--tz-ink); }
+        &::placeholder { color: var(--tz-muted); }
+    }
+
+    .btn { border-radius: 0; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.85rem 1.5rem; }
+    .btn-sm { padding: 0.45rem 0.9rem; }
+    .btn-dark { --bs-btn-bg: var(--tz-ink); --bs-btn-border-color: var(--tz-ink); --bs-btn-hover-bg: #000; --bs-btn-hover-border-color: #000; }
+    .btn-outline-dark { --bs-btn-color: var(--tz-ink); --bs-btn-border-color: var(--tz-ink); --bs-btn-hover-bg: var(--tz-ink); --bs-btn-hover-border-color: var(--tz-ink); }
+    .btn-link { text-transform: none; letter-spacing: 0; font-weight: 500; }
+
+    .card, .alert, .dropdown-menu, .offcanvas { border-radius: 0; }
+    .breadcrumb { --bs-breadcrumb-divider-color: var(--tz-muted); }
+}
+
+// ---------- Cabecera ----------
+.tz-announce { background: var(--tz-ink); color: var(--tz-paper); text-align: center; padding: 0.45rem 1rem; }
+
+.tz-header {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    background: var(--tz-paper);
+    border-bottom: 1px solid var(--tz-line);
+
+    .tz-header-row {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        min-height: 68px;
+        padding: 0 1rem;
+
+        @media (min-width: 992px) { padding: 0 2rem; }
+    }
+
+    .tz-logo {
+        font-family: var(--tz-display);
+        font-size: clamp(1.6rem, 3vw, 2.25rem);
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        margin-right: -0.18em; // compensa el tracking para centrar
+        color: var(--tz-ink);
+        text-decoration: none;
+        line-height: 1;
+    }
+
+    .tz-nav { display: flex; align-items: center; gap: 1.5rem; }
+    .tz-actions { display: flex; align-items: center; justify-content: flex-end; gap: 1.25rem; }
+
+    .tz-nav a, .tz-actions a, .tz-actions button {
+        color: var(--tz-ink);
+        text-decoration: none;
+        background: none;
+        border: 0;
+        padding: 0.25rem 0;
+        border-bottom: 1px solid transparent;
+        &:hover, &.active { border-bottom-color: var(--tz-ink); }
+    }
+}
+
+// Menú lateral de categorías (celular)
+.tz-menu a { display: block; padding: 0.85rem 0; border-bottom: 1px solid var(--tz-line); color: var(--tz-ink); text-decoration: none; }
+
+// ---------- Portada ----------
+.tz-hero {
+    position: relative;
+    height: min(82vh, 820px);
+    min-height: 460px;
+    overflow: hidden;
+    background: var(--tz-warm);
+
+    img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; display: block; }
+
+    .tz-hero-text {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 6rem 1.25rem 2.5rem;
+        color: #fff;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+
+        @media (min-width: 992px) { padding: 8rem 3rem 3.5rem; }
+    }
+
+    h1 { font-family: var(--tz-display); font-weight: 400; font-size: clamp(2.5rem, 6vw, 5.25rem); line-height: 1; max-width: 14ch; margin-bottom: 0.75rem; }
+
+    .btn-light { --bs-btn-bg: #fff; --bs-btn-border-color: #fff; --bs-btn-color: var(--tz-ink); --bs-btn-hover-bg: var(--tz-ink); --bs-btn-hover-border-color: var(--tz-ink); --bs-btn-hover-color: #fff; }
+}
+
+// Pestañas de categorías bajo el banner
+.tz-tabs {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    padding: 1.5rem 1rem;
+
+    a {
+        color: var(--tz-muted);
+        text-decoration: none;
+        padding-bottom: 0.2rem;
+        border-bottom: 1px solid transparent;
+        &:hover { color: var(--tz-ink); }
+        &.active { color: var(--tz-ink); border-bottom-color: var(--tz-ink); }
+    }
+}
+
+// Beneficios
+.tz-benefits {
+    background: var(--tz-warm);
+    i { font-size: 1.4rem; }
+}
+
+// Banners editoriales a dos columnas
+.tz-editorial {
+    display: grid;
+    gap: 4px;
+    grid-template-columns: 1fr;
+    @media (min-width: 768px) { grid-template-columns: 1fr 1fr; }
+
+    a {
+        position: relative;
+        display: block;
+        aspect-ratio: 4 / 5;
+        overflow: hidden;
+        background: var(--tz-warm);
+        color: #fff;
+        text-decoration: none;
+
+        img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--tz-ease); }
+        &:hover img { transform: scale(1.03); }
+
+        > span {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 4rem 1.5rem 1.5rem;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+        }
+    }
+}
+
+// ---------- Grilla de productos ----------
+.tz-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 4px;
+
+    @media (min-width: 992px) { grid-template-columns: repeat(4, 1fr); }
+}
+
+.tz-card {
+    display: flex;
+    flex-direction: column;
+    color: var(--tz-ink);
+    text-decoration: none;
+
+    .tz-card-img {
+        position: relative;
+        aspect-ratio: 3 / 4;
+        overflow: hidden;
+        background: var(--tz-warm);
+        img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s ease-in-out; }
+    }
+
+    .tz-card-tag {
+        position: absolute;
+        left: 0.6rem;
+        top: 0.6rem;
+        background: var(--tz-paper);
+        padding: 0.2rem 0.5rem;
+    }
+
+    .tz-card-info { padding: 0.75rem 0.25rem 0; display: flex; flex-direction: column; gap: 0.2rem; }
+    .tz-card-name { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+    .tz-card-price { font-size: 0.9rem; }
+}
+
+// ---------- Ficha de producto ----------
+.tz-gallery {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+
+    figure { flex: 0 0 100%; margin: 0; scroll-snap-align: start; aspect-ratio: 3 / 4; background: var(--tz-warm); }
+    img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    @media (min-width: 992px) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        overflow: visible;
+        figure { flex: none; }
+        figure:only-child { grid-column: span 2; }
+    }
+}
+
+.tz-buy-panel {
+    @media (min-width: 992px) { position: sticky; top: 100px; }
+}
+
+.tz-choices { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.tz-choice {
+    input { position: absolute; opacity: 0; pointer-events: none; }
+
+    span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        min-width: 3rem;
+        height: 2.75rem;
+        padding: 0 0.9rem;
+        border: 1px solid #b9b4ab;
+        background: var(--tz-paper);
+        color: var(--tz-ink);
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+        &:hover { border-color: var(--tz-ink); }
+    }
+
+    input:checked + span { background: var(--tz-ink); border-color: var(--tz-ink); color: var(--tz-paper); }
+    input:focus-visible + span { outline: 2px solid var(--tz-ink); outline-offset: 2px; }
+    input:disabled + span { color: #a8a39b; border-color: var(--tz-line); text-decoration: line-through; cursor: not-allowed; }
+
+    .tz-swatch { width: 0.9rem; height: 0.9rem; border: 1px solid rgba(0, 0, 0, 0.25); display: inline-block; }
+}
+
+.tz-details {
+    border-top: 1px solid var(--tz-line);
+    summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        cursor: pointer;
+        list-style: none;
+        &::-webkit-details-marker { display: none; }
+        &::after { content: '+'; font-size: 1.1rem; }
+    }
+    &[open] summary::after { content: '−'; }
+}
+
+// ---------- Bolsa lateral ----------
+.free-shipping-progress { height: 3px; background-color: var(--tz-warm-deep); .progress-bar { background-color: var(--tz-ink); } }
+
+// ---------- Pie ----------
+.tz-footer {
+    background: var(--tz-warm);
+    color: var(--tz-ink);
+    a { color: var(--tz-ink); text-decoration: none; &:hover { text-decoration: underline; } }
+}
+
+// ---------- Paginación ----------
+.pagination .page-link { border-radius: 0 !important; color: var(--tz-ink); border-color: var(--tz-line); }
+.pagination .page-item.active .page-link { background-color: var(--tz-ink); border-color: var(--tz-ink); color: #fff; }
+
+// Margen de página de 16px en celular
+.tz .container { --bs-gutter-x: 2rem; }

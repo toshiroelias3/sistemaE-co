@@ -1,19 +1,19 @@
 # Tienda pública TEZAN
 
-Scope: todas las vistas públicas de la tienda (portada, catálogo, ficha de producto, bolsa, checkout, confirmación, mis pedidos, login y registro). El panel admin queda fuera. Mode: Persuade en la portada y la ficha; Operate en la bolsa, el checkout y los pedidos, dentro del mismo mundo.
+Scope: todas las vistas públicas de la tienda (portada, catálogo, ficha, bolsa, checkout, confirmación, mis pedidos, login y registro). El panel admin queda fuera. Mode: Persuade en la portada y la ficha; Operate en la bolsa, el checkout y los pedidos.
 
-Audiencia: jóvenes peruanos unisex, sobre todo desde el celular. Éxito = verse premium. No perder el blanco y negro; no parecer plantilla.
+Audiencia: jóvenes peruanos unisex, sobre todo desde el celular. Éxito = verse premium y leerse de inmediato como tienda de ropa online.
 
 ## Direction contract
 
-THESIS: La tienda se recorre como el piso de damero de una casona limeña: un solo módulo de baldosa cuadrada ordena toda la página y cada prenda ocupa sus baldosas. Rechaza la plantilla de foto a todo el ancho con titular centrado y una fila de tarjetas iguales.
+THESIS: El estándar del e-commerce de moda, con el nivel de Zara: la fotografía manda, la interfaz se retira y comprar es obvio desde el primer viewport. Reemplaza la dirección conceptual «Damero limeño», que el usuario descartó por verse plana y poco comercial.
 
-OWN-WORLD: Mármol negro #141413 y mármol blanco #f2f2ef como únicas superficies, con una veta gris solo para texto secundario. Las esquinas son rectas porque las baldosas lo son. La marca y los títulos van en una serif lapidaria (Marcellus); el texto, en una grotesca de trabajo (Hanken Grotesk), siempre en tipo oración y sin rótulos en mayúsculas. Lo activo o seleccionado es siempre la baldosa más oscura. Una cenefa de baldosas pequeñas marca el borde del piso.
+OWN-WORLD: Fondo blanco, texto negro y un neutro cálido (#f4f1ec) para fondos de foto y el pie; la calidez la ponen las fotos. Logo y títulos de campaña en Bodoni Moda (didona de alto contraste); interfaz en Hanken Grotesk, con navegación y etiquetas en mayúsculas pequeñas con tracking moderado, como en la referencia. Esquinas rectas, sin sombras, botones negros sólidos.
 
-STORY: El visitante entiende en una pantalla que son polos hechos en Perú, de buena tela y precio claro. Cree en la calidad por el detalle concreto y elige talla y color sin salir de la portada.
+STORY: El visitante ve una campaña de moda, entiende que son básicos hechos en Perú, entra a una categoría o a la grilla y compra eligiendo talla en la ficha.
 
-FIRST VIEWPORT: Retícula de 8×4 baldosas. TEZAN monumental ocupa 4×2 baldosas negras arriba a la izquierda; la foto de la prenda destacada, 3×3 blancas a la derecha; la frase de la marca, 4×1. La baldosa negra de compra (3×1, bajo la foto) lleva nombre, precio, tallas y colores elegibles y «Agregar a la bolsa», que funciona sin JS. Las baldosas restantes llevan los hechos (hecho en Perú, envío gratis desde S/ 200, tarjeta o Yape, cambios de talla).
+FIRST VIEWPORT: Barra de anuncio delgada; cabecera blanca con categorías a la izquierda, TEZAN centrado en Bodoni y Buscar, Cuenta y Bolsa (n) a la derecha. Debajo, la foto de campaña a todo el ancho (unos 80vh) con título, subtítulo y el botón «Ver colección» abajo a la izquierda, en blanco sobre la foto.
 
-FORM: Damero limeño, candidata 3 de 7 en la lista propia ordenada. seed:427eeb4a8bf343b1. Interacción distintiva: elegir talla o color oscurece esa baldosa. Movimiento: un solo momento al cargar la portada, cuando las baldosas del primer viewport se asientan en diagonal como un piso que se coloca; respeta prefers-reduced-motion.
+FORM: Canon de la categoría, elegido por el usuario (salida estándar), con Zara como barra de calidad. seed:427eeb4a8bf343b1. Interacción distintiva: en la grilla, al pasar el cursor se recorren las fotos de la prenda; en la ficha, el panel de compra queda fijo mientras bajan las fotos. Movimiento: solo transiciones de estado y el cambio de foto.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

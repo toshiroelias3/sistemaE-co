@@ -16,7 +16,7 @@
     },
     "dependencies": {
         "@fontsource-variable/hanken-grotesk": "^5.3.0",
-        "@fontsource/marcellus": "^5.3.0",
+        "@fontsource/bodoni-moda": "^5.3.0",
         "@popperjs/core": "^2.11.8",
         "bootstrap": "^5.3.8",
         "bootstrap-icons": "^1.13.1",

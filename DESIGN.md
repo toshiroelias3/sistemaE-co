@@ -1,161 +1,147 @@
 ---
 name: TEZAN
-description: Damero limeño. La tienda pública se ordena como el piso de mármol blanco y negro de una casona limeña.
+description: E-commerce de moda clásico con Zara como barra de calidad. La fotografía manda y la interfaz se retira.
 colors:
-  marble-black: "#141413"
-  marble-black-soft: "#2a2927"
-  marble-white: "#f2f2ef"
-  marble-white-deep: "#e4e3de"
-  vein: "#5e5c57"
-  vein-light: "#b3b0a8"
-  surface: "#ffffff"
+  ink: "#111111"
+  paper: "#ffffff"
+  warm: "#f3f2ef"
+  warm-deep: "#e6e4df"
+  muted: "#6b6760"
+  line: "#e2ded7"
+  field-border: "#b9b4ab"
 typography:
-  display:
-    fontFamily: "Marcellus, 'Times New Roman', serif"
-    fontSize: "14.6cqi"
+  logo:
+    fontFamily: "'Bodoni Moda', Didot, 'Times New Roman', serif"
+    fontSize: "clamp(1.6rem, 3vw, 2.25rem)"
+    fontWeight: 500
+    lineHeight: 1
+    letterSpacing: "0.18em"
+  campaign:
+    fontFamily: "'Bodoni Moda', Didot, 'Times New Roman', serif"
+    fontSize: "clamp(2.5rem, 6vw, 5.25rem)"
     fontWeight: 400
-    lineHeight: 0.82
-    letterSpacing: "-0.02em"
-  heading:
-    fontFamily: "Marcellus, 'Times New Roman', serif"
-    fontSize: "clamp(1.35rem, 2.4cqi, 2.1rem)"
-    fontWeight: 400
-    lineHeight: 1.2
-    letterSpacing: "-0.01em"
-  body:
-    fontFamily: "'Hanken Grotesk Variable', 'Segoe UI', sans-serif"
-    fontSize: "16px"
-    fontWeight: 400
-    lineHeight: 1.5
+    lineHeight: 1
     letterSpacing: "normal"
-  price:
-    fontFamily: "'Hanken Grotesk Variable', 'Segoe UI', sans-serif"
+  label:
+    fontFamily: "'Hanken Grotesk Variable', 'Helvetica Neue', Arial, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 500
+    lineHeight: 1.5
+    letterSpacing: "0.08em"
+  body:
+    fontFamily: "'Hanken Grotesk Variable', 'Helvetica Neue', Arial, sans-serif"
     fontSize: "16px"
-    fontWeight: 600
+    fontWeight: 400
     lineHeight: 1.5
     letterSpacing: "normal"
 rounded:
   none: "0"
 spacing:
-  tile-pad: "clamp(1rem, 1.6cqi, 1.25rem)"
+  grid-gap: "4px"
   page-gutter: "16px"
-  cenefa: "10px"
+  page-gutter-lg: "48px"
 components:
   button-primary:
-    backgroundColor: "{colors.marble-black}"
-    textColor: "{colors.marble-white}"
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.paper}"
     rounded: "{rounded.none}"
-    padding: "16px 24px"
+    padding: "14px 24px"
   button-primary-hover:
     backgroundColor: "#000000"
   button-secondary:
     backgroundColor: "transparent"
-    textColor: "{colors.marble-black}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.none}"
-    padding: "16px 24px"
-  choice-tile:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.marble-black}"
+    padding: "14px 24px"
+  choice:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.none}"
     height: "44px"
-  choice-tile-selected:
-    backgroundColor: "{colors.marble-black}"
-    textColor: "{colors.marble-white}"
-  filter-tile:
-    backgroundColor: "{colors.marble-white-deep}"
-    textColor: "{colors.marble-black}"
-    rounded: "{rounded.none}"
-    padding: "12px 18px"
-  filter-tile-active:
-    backgroundColor: "{colors.marble-black}"
-    textColor: "{colors.marble-white}"
+  choice-selected:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.paper}"
 ---
 
 # Design System: TEZAN
 
 ## Overview
 
-La tienda pública de TEZAN se recorre como el piso de damero de una casona de Barranco o del Centro de Lima. Un solo módulo de baldosa cuadrada ordena la página: la portada es una retícula de 8×4 baldosas en escritorio (4 columnas en celular) y cada prenda ocupa sus propias baldosas. El blanco y negro no es una paleta elegida: es el material del piso. Todo vive en `resources/sass/_damero.scss`, aplicado solo bajo `body.tz` (el panel admin queda fuera).
+La tienda pública es un e-commerce de moda convencional, ejecutado con el nivel de Zara, que es la referencia que el usuario eligió. Las fotos de campaña y de producto ponen el color y la calidez. La interfaz es blanca, negra y gris cálido, con esquinas rectas y sin sombras. Todo vive en `resources/sass/_tienda.scss`, aplicado bajo `body.tz`; el panel admin no lo usa.
 
-La identidad "old money" se transmite con una serif lapidaria a escala monumental y con la renuncia a los adornos: sin sombras, sin esquinas redondeadas, sin rótulos en mayúsculas.
+Esta dirección reemplazó a «Damero limeño», descartada por el usuario por verse plana y poco comercial (ver PRODUCT.md, Brand Commitments).
 
 ## Colors
 
 ### Primary
-- **Mármol negro** `#141413`: baldosas oscuras, botones principales, cabecera de marca, pie y todo lo activo o seleccionado.
+- **Tinta** `#111111`: texto, botones principales, opción elegida y barra de anuncio.
 
 ### Neutral
-- **Mármol blanco** `#f2f2ef`: suelo de la página y baldosas claras.
-- **Mármol blanco en sombra** `#e4e3de`: fondo de fotos que aún cargan, filtros sin elegir y la franja de navegación móvil.
-- **Mármol negro pulido** `#2a2927`: controles sin elegir sobre una baldosa negra.
-- **Veta** `#5e5c57`: texto secundario sobre blanco (6:1).
-- **Veta clara** `#b3b0a8`: texto secundario sobre negro (8:1).
-- **Superficie** `#ffffff`: campos de formulario y la barra de cabecera.
+- **Papel** `#ffffff`: fondo de la página.
+- **Gris cálido** `#f3f2ef`: fondo de las fotos mientras cargan, franja de beneficios y pie.
+- **Gris cálido profundo** `#e6e4df`: pista de la barra de envío gratis.
+- **Apagado** `#6b6760`: texto secundario (5.6:1).
+- **Línea** `#e2ded7`: borde inferior de la cabecera y divisores del pie y de los detalles.
+- **Borde de campo** `#b9b4ab`: inputs y opciones sin elegir.
 
 ### Named Rules
-- **La baldosa más oscura manda.** Lo activo o seleccionado (talla, color, filtro, enlace de navegación actual, bolsa) es siempre la baldosa más oscura de su grupo. Sobre una baldosa negra, lo elegido pasa a negro puro con borde blanco.
-- **Sin tercer color.** No hay acento: el color solo aparece en las fotos de las prendas y en las muestras de color de cada variante.
+- **La foto pone el color.** No hay color de acento en la interfaz.
 
 ## Typography
 
 ### Hierarchy
-- **Display** (Marcellus 400, 14.6cqi en escritorio y 22cqi en celular, interlineado 0.82): solo la palabra TEZAN en la portada.
-- **Títulos** (Marcellus 400): h1 a h3, nombres de prenda destacados y la frase de marca. Nunca en negrita: la serif no tiene corte bold y la negrita falsa queda prohibida.
-- **Texto** (Hanken Grotesk Variable 400/500, 16px/1.5): todo lo demás, siempre en tipo oración.
-- **Precio** (Hanken Grotesk 600 con cifras tabulares): clase `.tz-price`.
+- **Logo** (Bodoni Moda 500, tracking 0.18em): TEZAN en la cabecera, el menú móvil y el pie.
+- **Campaña** (Bodoni Moda 400): el titular del banner, los títulos de sección del catálogo y los nombres en los banners de categoría.
+- **Etiqueta** (Hanken Grotesk 500, 13px, mayúsculas, tracking 0.08em, clase `.tz-label`): navegación, botones, nombres de prenda en la grilla, encabezados del pie y de los detalles.
+- **Texto** (Hanken Grotesk 400, 16px/1.5): descripciones, formularios y textos de ayuda.
 
 ### Named Rules
-- **Tipo oración siempre.** Nada de `text-uppercase` ni de tracking ancho en la tienda pública.
-- Las dos fuentes se sirven desde el proyecto vía `@fontsource` (importadas en `resources/js/app.js`).
+- **Las mayúsculas son solo de interfaz.** Navegación, botones y etiquetas van en mayúsculas pequeñas, como en la referencia; los párrafos nunca.
+- **Sin eyebrow sobre los títulos.** El titular de campaña va solo.
 
 ## Layout
 
-- **La baldosa como regla de medida.** `.tz-floor` es una retícula con `--cols` (4 en celular, 8 desde 992px) y `--tile: 100cqi / --cols`, de modo que las filas son cuadradas a cualquier ancho. La portada asigna áreas (`word`, `photo`, `copy`, `buy`, `f1`–`f4`, `l1`–`l4`) que alternan blanco y negro como un damero.
-- **Catálogo sin juntas.** `.tz-grid` coloca las prendas contiguas (2, 3 o 4 columnas). La banda de información de cada prenda alterna negro y blanco con una paridad de damero calculada para cada número de columnas.
-- **Cenefa.** `.tz-cenefa` es la franja de baldosas pequeñas que cierra el primer viewport, el pie y la cabecera de la bolsa lateral.
-- El margen de página en celular es de 16px.
+- La cabecera es una rejilla de tres columnas: categorías a la izquierda, logo centrado y Buscar, Cuenta y Bolsa (n) a la derecha. En celular, menú lateral y bolsa.
+- Portada: banner de campaña (82vh, máximo 820px) con el texto abajo a la izquierda sobre un degradado oscuro de legibilidad; pestañas de categorías; grilla; banners de categoría (solo si hay dos con foto); franja de beneficios.
+- Grilla de productos: 2 columnas en celular y 4 desde 992px, fotos 3:4, 4px de separación horizontal y 2rem vertical.
+- Ficha de producto: fotos en dos columnas en escritorio (deslizables en celular) y un panel de compra fijo al hacer scroll.
 
 ## Elevation & Depth
 
-No hay elevación. La profundidad la dan el cambio de tono entre baldosas y las fotos. No se usan sombras ni líneas divisorias: las separaciones son por tono, espacio o escala.
+No hay elevación ni sombras. El único degradado es el de legibilidad sobre las fotos del banner y de los banners de categoría.
 
 ## Shapes
 
-Esquinas rectas en todo (`border-radius: 0`): las baldosas son cuadradas.
+Esquinas rectas en todo.
 
 ## Components
 
 ### Buttons
-- Principal: negro sólido con texto blanco y peso 600. En hover pasa a negro puro.
-- Secundario: contorno negro de 1px. En hover se rellena de negro.
-- Sobre una baldosa negra, el principal se invierte (`.btn-light` en blanco mármol).
+- Principal: tinta sólida con texto en mayúsculas pequeñas.
+- Secundario: contorno de 1px.
+- Sobre una foto: blanco sólido o contorno blanco.
 
-### Chips (baldosas de elección)
-`.tz-choice`: radio oculto más una baldosa de 44px con borde de 1px. Si está elegida, se rellena de negro. Si no hay stock, lleva borde punteado y texto tachado. Las muestras de color usan `hex_code` de la variante.
+### Chips
+`.tz-choice`: talla o color en una caja de 44px de alto. Al elegirla se rellena de tinta. Sin stock, queda tachada y deshabilitada.
 
 ### Cards / Containers
-`.tz-card` dentro de `.tz-grid`: foto cuadrada y banda de información con nombre, precio y la marca "Esencial" si la prenda está destacada. Al mover el cursor sobre la foto se recorren las imágenes de la prenda.
+`.tz-card`: foto 3:4 sobre gris cálido, nombre en mayúsculas pequeñas y precio debajo. La marca "Esencial" va como etiqueta blanca sobre la foto. Al mover el cursor se recorren las fotos de la prenda.
 
 ### Inputs / Fields
-Borde negro de 1px, fondo blanco y esquinas rectas. El foco es un anillo negro sólido de 2px.
+Borde `#b9b4ab` de 1px, esquinas rectas. Al enfocar, borde de tinta.
 
 ### Navigation
-La cabecera blanca está fija arriba. A la izquierda, la baldosa negra de marca; a la derecha, la baldosa negra de la bolsa con su contador. El enlace activo se vuelve baldosa negra. En celular, las categorías van en una franja desplazable en mármol blanco en sombra.
-
-### Baldosa de compra (componente distintivo)
-`.tz-buy`, en la portada: un formulario completo que funciona sin JavaScript (talla, color y "Agregar a la bolsa") sobre una baldosa negra. Con JavaScript, deshabilita las combinaciones sin stock.
+Los enlaces de la cabecera se subrayan al pasar el cursor y cuando están activos. Las pestañas de categorías bajo el banner van centradas, y la activa lleva subrayado de tinta.
 
 ## Do's and Don'ts
 
 ### Do:
-- Componer cada nueva superficie con el módulo de baldosa y alternar blanco y negro como un piso.
-- Dejar que lo activo sea la baldosa más oscura.
-- Usar Marcellus a escala grande y siempre en peso 400.
-- Mostrar solo hechos confirmados: hecho en Perú, envío gratis desde S/ 200, tarjeta o Yape.
+- Dejar que la fotografía lleve el peso visual.
+- Usar fotos propias de TEZAN cuando existan. El banner usa hoy una foto de stock de Unsplash.
+- Mantener visibles las categorías, el precio y la bolsa en todo momento.
 
 ### Don't:
-- No añadir un color de acento, degradados ni sombras.
-- No usar rótulos en mayúsculas ni etiquetas tipo eyebrow sobre los títulos.
-- No imitar vetas de mármol con CSS: el material se expresa con el tono plano, no con una textura falsa.
-- No separar con líneas finas lo que puede separarse por tono.
-- No inventar políticas, por ejemplo de cambios o devoluciones, mientras no estén definidas en PRODUCT.md.
+- No volver al blanco y negro plano ni a la marca gigante como protagonista.
+- No usar fondos crema ni colores de acento en la interfaz.
+- No poner etiquetas eyebrow sobre los titulares.
+- No inventar políticas (cambios, devoluciones) que no estén en PRODUCT.md.

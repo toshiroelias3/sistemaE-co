@@ -82,7 +82,18 @@ class ShopController extends Controller
             ->latest()
             ->first();
 
-        return view('shop.home', compact('products', 'categories', 'featured'));
+        // 8. Banners por categoría: la foto de portada de una prenda activa de cada una
+        $editorial = $categories->take(2)->map(function ($category) {
+            $ids = $category->children->pluck('id')->push($category->id);
+            $image = \App\Models\ProductImage::whereHas('product', fn ($q) => $q->where('is_active', true)->whereIn('category_id', $ids))
+                ->orderByDesc('is_primary')
+                ->latest()
+                ->value('image_path');
+
+            return ['category' => $category, 'image' => $image];
+        })->filter(fn ($item) => $item['image']);
+
+        return view('shop.home', compact('products', 'categories', 'featured', 'editorial'));
     }
 
     /**

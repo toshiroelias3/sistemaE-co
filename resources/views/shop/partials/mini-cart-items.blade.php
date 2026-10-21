@@ -6,7 +6,7 @@
 
 @if(empty($cart))
     <div class="text-center my-auto py-5">
-        <p class="tz-serif fs-3 mb-2">Tu bolsa está vacía</p>
+        <p class="tz-display fs-3 mb-2">Tu bolsa está vacía</p>
         <p class="text-muted mb-4">Elige una prenda y aparecerá aquí.</p>
         <a href="{{ route('home') }}#catalogo" class="btn btn-dark px-4" data-bs-dismiss="offcanvas">Ver el catálogo</a>
     </div>

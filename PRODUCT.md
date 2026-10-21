@@ -31,6 +31,7 @@ Prendas hechas en Perú, con telas de calidad y buen fit, a precio accesible, de
 ## Brand Commitments
 - Nombre: TEZAN (razón social mostrada: TEZAN S.A.C.).
 - Estética "old money" / atemporal: es identidad de marca y debe mantenerse.
+- La tienda debe leerse de inmediato como un e-commerce de moda convencional, con Zara como referencia de nivel (preferencia confirmada el 2026-10-20, tras descartar una dirección conceptual "Damero limeño"). Lo que se descartó: el blanco y negro plano y la portada tipo póster con la marca gigante. La calidez viene de la fotografía.
 - Existe un logo propio. **Pendiente:** el archivo aún no está en el repositorio; hoy el sitio usa la palabra "TEZAN" en texto.
 - Contacto mostrado: soporte@tezan.com; Yape 942 817 550 (titular TEZAN S.A.C.).
 

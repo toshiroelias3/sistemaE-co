@@ -3,196 +3,167 @@
 @section('title', $product->name)
 @section('meta_description', Str::limit($product->description ?? 'Prenda TEZAN hecha en Perú.', 155))
 
-@section('content')
+@section('full')
 @php
     $colors = $product->variants->pluck('color')->filter()->unique('id');
 @endphp
 
-<nav aria-label="Ruta" class="small mb-4">
-    <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><a href="{{ route('home') }}" class="link-dark">Inicio</a></li>
-        @if($product->category)
-            <li class="breadcrumb-item"><a href="{{ route('home', ['category' => $product->category->id]) }}#catalogo" class="link-dark">{{ $product->category->name }}</a></li>
-        @endif
-        <li class="breadcrumb-item active" aria-current="page">{{ $product->name }}</li>
-    </ol>
-</nav>
-
-<div class="row g-4 g-lg-5">
-    <!-- Galería -->
-    <div class="col-12 col-lg-7">
-        <div class="tz-gallery-main">
-            @if($product->images->isNotEmpty())
-                <img id="main-product-image" src="{{ asset('storage/' . $product->images->first()->image_path) }}" alt="{{ $product->name }}">
-            @else
-                <div class="h-100 d-flex align-items-center justify-content-center text-muted">Sin foto por ahora</div>
+<div class="container-fluid px-0 px-lg-5 pt-lg-4">
+    <div class="row g-0 g-lg-5">
+        <!-- Fotos: deslizables en celular, en dos columnas en escritorio -->
+        <div class="col-12 col-lg-7 col-xl-8">
+            <div class="tz-gallery" aria-label="Fotos de {{ $product->name }}">
+                @forelse($product->images as $index => $img)
+                    <figure>
+                        <img src="{{ asset('storage/' . $img->image_path) }}" alt="{{ $index === 0 ? $product->name : '' }}" {{ $index > 1 ? 'loading=lazy' : '' }}>
+                    </figure>
+                @empty
+                    <figure class="d-flex align-items-center justify-content-center text-muted">Foto próximamente</figure>
+                @endforelse
+            </div>
+            @if($product->images->count() > 1)
+                <p class="text-center small text-muted d-lg-none mt-2 mb-0">Desliza para ver más fotos</p>
             @endif
         </div>
 
-        @if($product->images->count() > 1)
-            <div class="tz-thumbs mt-1" role="group" aria-label="Fotos de la prenda">
-                @foreach($product->images as $index => $img)
-                    <button type="button" class="product-thumb" data-large-src="{{ asset('storage/' . $img->image_path) }}" aria-current="{{ $index === 0 ? 'true' : 'false' }}" aria-label="Ver foto {{ $index + 1 }}">
-                        <img src="{{ asset('storage/' . $img->image_path) }}" loading="lazy" alt="">
-                    </button>
+        <!-- Panel de compra -->
+        <div class="col-12 col-lg-5 col-xl-4">
+            <div class="tz-buy-panel px-3 px-lg-0 py-4 py-lg-0">
+                <nav aria-label="Ruta" class="small mb-3">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{{ route('home') }}" class="link-secondary">Inicio</a></li>
+                        @if($product->category)
+                            <li class="breadcrumb-item"><a href="{{ route('home', ['category' => $product->category->id]) }}#catalogo" class="link-secondary">{{ $product->category->name }}</a></li>
+                        @endif
+                    </ol>
+                </nav>
+
+                <h1 class="tz-label fs-6 mb-2" style="letter-spacing: 0.06em;">{{ $product->name }}</h1>
+                <p class="tz-price fs-5 mb-4">S/ {{ number_format($product->base_price, 2) }}</p>
+
+                @if($sizes->isEmpty())
+                    <p class="border p-3 mb-4">Esta prenda está agotada por ahora.</p>
+                @else
+                    <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="buy_now" id="buy_now_input" value="0">
+
+                        <fieldset class="mb-4">
+                            <legend class="tz-label mb-2">Color: <span id="color-name" class="text-muted"></span></legend>
+                            <div class="tz-choices">
+                                @foreach($colors as $color)
+                                    <label class="tz-choice">
+                                        <input type="radio" name="color_id" value="{{ $color->id }}" data-name="{{ $color->name }}" required>
+                                        <span><i class="tz-swatch" style="background: {{ $color->hex_code ?? 'transparent' }}"></i>{{ $color->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="mb-3">
+                            <legend class="tz-label mb-2">Talla</legend>
+                            <div class="tz-choices">
+                                @foreach($sizes as $size)
+                                    <label class="tz-choice">
+                                        <input type="radio" name="size_id" value="{{ $size->id }}" required>
+                                        <span>{{ $size->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </fieldset>
+
+                        <p id="stock-status" class="small text-muted mb-4" aria-live="polite">Elige color y talla.</p>
+
+                        <input type="hidden" id="qty-input" name="quantity" value="1">
+                        <button type="submit" id="btn-add-cart" class="btn btn-dark w-100 mb-2" disabled>Añadir a la bolsa</button>
+                        <button type="submit" id="btn-buy-now" class="btn btn-outline-dark w-100" disabled>Comprar ahora</button>
+                    </form>
+                @endif
+
+                <div class="mt-4">
+                    @if($product->description)
+                        <details class="tz-details" open>
+                            <summary class="tz-label">Descripción</summary>
+                            <p class="small pb-3 mb-0" style="white-space: pre-line;">{{ $product->description }}</p>
+                        </details>
+                    @endif
+                    <details class="tz-details">
+                        <summary class="tz-label">Envío</summary>
+                        <p class="small pb-3 mb-0">Despachamos a todo el Perú. Envío gratis en compras desde S/ {{ number_format(\App\Support\Cart::FREE_SHIPPING_FROM, 0) }}; si no, cuesta S/ {{ number_format(\App\Support\Cart::SHIPPING_COST, 0) }}.</p>
+                    </details>
+                    <details class="tz-details border-bottom">
+                        <summary class="tz-label">Pago</summary>
+                        <p class="small pb-3 mb-0">Paga con tarjeta de crédito, débito o Yape.</p>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if($relatedProducts->isNotEmpty())
+        <section class="px-3 px-lg-0 py-5 mt-lg-4" aria-labelledby="relacionados">
+            <h2 id="relacionados" class="tz-label mb-4">También te puede gustar</h2>
+            <div class="tz-grid">
+                @foreach($relatedProducts as $related)
+                    @include('shop.partials.product-tile', ['product' => $related])
                 @endforeach
             </div>
-        @endif
-    </div>
-
-    <!-- Datos y compra -->
-    <div class="col-12 col-lg-5">
-        <h1 class="display-5 mb-2">{{ $product->name }}</h1>
-        <p class="tz-price fs-3 mb-4">S/ {{ number_format($product->base_price, 2) }}</p>
-
-        @if($product->description)
-            <p class="mb-4" style="white-space: pre-line; max-width: 60ch;">{{ $product->description }}</p>
-        @endif
-
-        @if($sizes->isEmpty())
-            <div class="tz-tile tz-ink">Esta prenda está agotada por ahora.</div>
-        @else
-            <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST">
-                @csrf
-                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                <input type="hidden" name="buy_now" id="buy_now_input" value="0">
-
-                <fieldset class="mb-4">
-                    <legend class="fs-6 fw-semibold mb-2">Talla</legend>
-                    <div class="tz-choices">
-                        @foreach($sizes as $size)
-                            <label class="tz-choice">
-                                <input type="radio" name="size_id" value="{{ $size->id }}" required>
-                                <span>{{ $size->name }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                </fieldset>
-
-                <fieldset class="mb-3">
-                    <legend class="fs-6 fw-semibold mb-2">Color</legend>
-                    <div class="tz-choices">
-                        @foreach($colors as $color)
-                            <label class="tz-choice">
-                                <input type="radio" name="color_id" value="{{ $color->id }}" required>
-                                <span><i class="tz-swatch" style="background: {{ $color->hex_code ?? 'transparent' }}"></i>{{ $color->name }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                </fieldset>
-
-                <p id="stock-status" class="small mb-4" aria-live="polite">Elige talla y color para ver la disponibilidad.</p>
-
-                <div class="d-flex align-items-stretch gap-2 mb-3">
-                    <label for="qty-input" class="visually-hidden">Cantidad</label>
-                    <div class="input-group flex-nowrap" style="width: 140px;">
-                        <button class="btn btn-outline-dark px-3" type="button" id="btn-qty-minus" aria-label="Quitar una unidad">−</button>
-                        <input type="number" id="qty-input" name="quantity" class="form-control text-center" value="1" min="1" required>
-                        <button class="btn btn-outline-dark px-3" type="button" id="btn-qty-plus" aria-label="Agregar una unidad">+</button>
-                    </div>
-                    <button type="submit" id="btn-add-cart" class="btn btn-dark flex-grow-1 py-3" disabled>Agregar a la bolsa</button>
-                </div>
-                <button type="submit" id="btn-buy-now" class="btn btn-outline-dark w-100 py-3" disabled>Comprar ahora</button>
-            </form>
-        @endif
-
-        <ul class="list-unstyled mt-5 mb-0">
-            <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>Hecho en Perú</li>
-            <li class="mb-2"><i class="bi bi-truck me-2"></i>Envío gratis desde S/ {{ number_format(\App\Support\Cart::FREE_SHIPPING_FROM, 0) }}; si no, S/ {{ number_format(\App\Support\Cart::SHIPPING_COST, 0) }}</li>
-            <li><i class="bi bi-credit-card me-2"></i>Paga con tarjeta o Yape</li>
-        </ul>
-    </div>
+        </section>
+    @endif
 </div>
-
-@if($relatedProducts->isNotEmpty())
-    <section class="mt-5 pt-4" aria-labelledby="relacionados">
-        <h2 id="relacionados" class="h1 mb-4">También te puede gustar</h2>
-        <div class="tz-grid">
-            @foreach($relatedProducts as $related)
-                @include('shop.partials.product-tile', ['product' => $related])
-            @endforeach
-        </div>
-    </section>
-@endif
 @endsection
 
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const variants = @json($variantMatrix);
-
-        // 1. Galería: la miniatura elegida pasa a la foto principal
-        const mainImage = document.getElementById('main-product-image');
-        const thumbs = document.querySelectorAll('.product-thumb');
-        thumbs.forEach(thumb => {
-            thumb.addEventListener('click', () => {
-                mainImage.style.opacity = '0.4';
-                setTimeout(() => { mainImage.src = thumb.dataset.largeSrc; mainImage.style.opacity = '1'; }, 100);
-                thumbs.forEach(t => t.setAttribute('aria-current', t === thumb ? 'true' : 'false'));
-            });
-        });
-
         const form = document.getElementById('add-to-cart-form');
         if (!form) return;
 
-        // 2. Disponibilidad por talla y color
         const sizeInputs = form.querySelectorAll('input[name="size_id"]');
         const colorInputs = form.querySelectorAll('input[name="color_id"]');
         const status = document.getElementById('stock-status');
-        const qtyInput = document.getElementById('qty-input');
+        const colorName = document.getElementById('color-name');
         const btnAddCart = document.getElementById('btn-add-cart');
         const btnBuyNow = document.getElementById('btn-buy-now');
-        let maxStock = 0;
 
-        const checked = name => form.querySelector(`input[name="${name}"]:checked`)?.value;
+        const checked = name => form.querySelector(`input[name="${name}"]:checked`);
         const setBuyable = ok => { btnAddCart.disabled = !ok; btnBuyNow.disabled = !ok; };
 
+        // Tallas sin stock para el color elegido quedan tachadas
         function sync() {
-            const size = checked('size_id');
+            const color = checked('color_id');
+            colorName.textContent = color ? color.dataset.name : '';
 
-            // Colores que no existen o están agotados en la talla elegida
-            colorInputs.forEach(input => {
-                const v = variants.find(v => String(v.size_id) === size && String(v.color_id) === input.value);
-                input.disabled = Boolean(size) && (!v || v.stock < 1);
+            sizeInputs.forEach(input => {
+                const v = variants.find(v => String(v.color_id) === color?.value && String(v.size_id) === input.value);
+                input.disabled = Boolean(color) && (!v || v.stock < 1);
                 if (input.disabled && input.checked) input.checked = false;
             });
 
-            const color = checked('color_id');
-            const match = variants.find(v => String(v.size_id) === size && String(v.color_id) === color);
-
-            if (!size || !color) {
-                status.textContent = size ? 'Ahora elige un color.' : 'Elige talla y color para ver la disponibilidad.';
+            const size = checked('size_id');
+            if (!color || !size) {
+                status.textContent = color ? 'Ahora elige tu talla.' : 'Elige color y talla.';
                 setBuyable(false);
                 return;
             }
 
-            maxStock = match.stock;
-            qtyInput.max = maxStock;
-            if (parseInt(qtyInput.value) > maxStock) qtyInput.value = maxStock;
-            status.textContent = maxStock <= 3 ? `Quedan ${maxStock} en esta talla y color.` : 'Disponible.';
+            const match = variants.find(v => String(v.color_id) === color.value && String(v.size_id) === size.value);
+            status.textContent = match.stock <= 3 ? `Últimas ${match.stock} unidades.` : 'Disponible.';
             setBuyable(true);
         }
 
         sizeInputs.forEach(i => i.addEventListener('change', sync));
         colorInputs.forEach(i => i.addEventListener('change', sync));
 
-        // Si solo hay una opción posible, se elige sola
-        if (sizeInputs.length === 1) sizeInputs[0].checked = true;
+        // Con una sola opción posible, se elige sola
+        if (colorInputs.length === 1) colorInputs[0].checked = true;
         sync();
-        const enabledColors = [...colorInputs].filter(i => !i.disabled);
-        if (enabledColors.length === 1) { enabledColors[0].checked = true; sync(); }
+        const enabledSizes = [...sizeInputs].filter(i => !i.disabled);
+        if (enabledSizes.length === 1) { enabledSizes[0].checked = true; sync(); }
 
-        // 3. Cantidad limitada al stock
-        document.getElementById('btn-qty-minus').addEventListener('click', () => {
-            const current = parseInt(qtyInput.value) || 1;
-            if (current > 1) qtyInput.value = current - 1;
-        });
-        document.getElementById('btn-qty-plus').addEventListener('click', () => {
-            const current = parseInt(qtyInput.value) || 1;
-            if (!maxStock || current < maxStock) qtyInput.value = current + 1;
-        });
-
-        // 4. Envío por AJAX; "Comprar ahora" va directo al checkout
+        // Envío por AJAX; "Comprar ahora" va directo al checkout
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             const isBuyNow = e.submitter === btnBuyNow;
@@ -223,7 +194,7 @@
             })
             .catch(error => {
                 const firstValidationError = error.errors ? Object.values(error.errors)[0][0] : null;
-                status.textContent = error.error || firstValidationError || 'No se pudo agregar la prenda. Inténtalo de nuevo.';
+                status.textContent = error.error || firstValidationError || 'No se pudo añadir la prenda. Inténtalo de nuevo.';
             })
             .finally(sync);
         });
