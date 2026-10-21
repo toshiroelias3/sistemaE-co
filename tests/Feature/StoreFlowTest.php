@@ -77,7 +77,7 @@ class StoreFlowTest extends TestCase
     public function test_public_pages_render(): void
     {
         $this->get(route('home'))->assertOk()->assertSee('Polo Básico');
-        $this->get(route('shop.product', 'polo-basico'))->assertOk()->assertSee('Agregar al carrito');
+        $this->get(route('shop.product', 'polo-basico'))->assertOk()->assertSee('Agregar a la bolsa');
         $this->get(route('cart.index'))->assertOk();
     }
 

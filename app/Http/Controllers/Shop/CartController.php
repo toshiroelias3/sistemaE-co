@@ -22,7 +22,7 @@ class CartController extends Controller
     }
 
     /**
-     * Añade un producto con variante específica al carrito vía AJAX o Web
+     * Añade un producto con variante específica a la bolsa vía AJAX o Web
      */
     public function add(Request $request)
     {
@@ -45,7 +45,7 @@ class CartController extends Controller
             return $this->fail($request, 'Lo sentimos, no hay stock disponible para esta combinación.');
         }
 
-        // 3. Obtener el carrito de la sesión
+        // 3. Obtener la bolsa de la sesión
         $cart = Cart::items();
         $cartKey = $request->product_id . '-' . $request->size_id . '-' . $request->color_id;
 
@@ -90,10 +90,10 @@ class CartController extends Controller
             if ($request->get('buy_now') == '1') {
                 return redirect()->route('checkout.index');
             }
-            return redirect()->route('cart.index')->with('success', 'Prenda añadida al carrito con éxito.');
+            return redirect()->route('cart.index')->with('success', 'Prenda agregada a tu bolsa con éxito.');
         }
 
-        return $this->cartResponse('Prenda añadida al carrito con éxito.');
+        return $this->cartResponse('Prenda agregada a tu bolsa con éxito.');
     }
 
     /**
@@ -130,7 +130,7 @@ class CartController extends Controller
     }
 
     /**
-     * Elimina un ítem específico del carrito vía AJAX o formulario tradicional
+     * Elimina un ítem específico de la bolsa vía AJAX o formulario tradicional
      */
     public function remove(Request $request)
     {
@@ -149,15 +149,15 @@ class CartController extends Controller
 
         // Si la petición viene por AJAX
         if ($request->ajax() || $request->wantsJson()) {
-            return $this->cartResponse('Producto eliminado del carrito.');
+            return $this->cartResponse('Prenda quitada de tu bolsa.');
         }
 
         // Redirección tradicional
-        return redirect()->back()->with('success', 'Producto eliminado del carrito.');
+        return redirect()->back()->with('success', 'Prenda quitada de tu bolsa.');
     }
 
     /**
-     * Respuesta JSON con el contador y el HTML renderizado del mini-carrito
+     * Respuesta JSON con el contador y el HTML renderizado del mini-bolsa
      */
     private function cartResponse(string $message)
     {

@@ -69,9 +69,20 @@ class ShopController extends Controller
         }
 
         // 6. Paginación optimizada manteniendo todos los parámetros de la URL
-        $products = $query->paginate(8);
+        $products = $query->paginate(12)->withQueryString();
 
-        return view('shop.home', compact('products', 'categories'));
+        // 7. Prenda de la portada: la destacada más reciente con stock (o la más reciente con stock)
+        $featured = Product::where('is_active', true)
+            ->whereHas('variants', fn ($q) => $q->where('stock', '>', 0))
+            ->with([
+                'images' => fn ($q) => $q->orderBy('is_primary', 'desc'),
+                'variants' => fn ($q) => $q->where('stock', '>', 0)->with(['size', 'color']),
+            ])
+            ->orderByDesc('is_featured')
+            ->latest()
+            ->first();
+
+        return view('shop.home', compact('products', 'categories', 'featured'));
     }
 
     /**

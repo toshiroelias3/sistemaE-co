@@ -1,30 +1,27 @@
-<footer class="bg-white border-top py-5 mt-auto">
-    <div class="container">
+<footer class="tz-footer mt-auto">
+    <div class="tz-cenefa"></div>
+    <div class="container py-5">
         <div class="row g-4">
             <div class="col-md-6">
-                <h6 class="fw-bold text-uppercase tracking-wider mb-3">TEZAN</h6>
-                <p class="text-muted small w-75">Estilo minimalista y atemporal. Diseños premium pensados para la versatilidad del día a día.</p>
+                <p class="tz-serif display-6 mb-2">TEZAN</p>
+                <p class="text-muted mb-0" style="max-width: 36ch;">Básicos de algodón hechos en Perú, pensados para durar más que una temporada.</p>
             </div>
-            <div class="col-md-3">
-                <h6 class="fw-bold text-uppercase tracking-wider small mb-3">Ayuda</h6>
-                <ul class="list-unstyled small text-muted">
-                    <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Envíos y Entregas</a></li>
-                    <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Cambios y Devoluciones</a></li>
+            <div class="col-6 col-md-3">
+                <h2 class="h6 mb-3">Tienda</h2>
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-2"><a href="{{ route('home') }}#catalogo">Catálogo</a></li>
+                    <li class="mb-2"><a href="{{ route('cart.index') }}">Tu bolsa</a></li>
+                    <li class="mb-2"><a href="{{ route('customer.orders.index') }}">Mis pedidos</a></li>
                 </ul>
             </div>
-            <div class="col-md-3">
-                <h6 class="fw-bold text-uppercase tracking-wider small mb-3">Contacto</h6>
-                <p class="text-muted small mb-1"><i class="bi bi-envelope me-2"></i> soporte@tezan.com</p>
-                <div class="d-flex gap-3 mt-3">
-                    <a href="#" class="text-dark"><i class="bi bi-instagram"></i></a>
-                    <a href="#" class="text-dark"><i class="bi bi-facebook"></i></a>
-                </div>
+            <div class="col-6 col-md-3">
+                <h2 class="h6 mb-3">Contacto</h2>
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-2"><a href="mailto:soporte@tezan.com"><i class="bi bi-envelope me-2"></i>soporte@tezan.com</a></li>
+                    <li class="mb-2 text-muted">Pagos con tarjeta o Yape</li>
+                </ul>
             </div>
         </div>
-        <div class="row mt-4 pt-4 border-top">
-            <div class="col-12 text-center text-muted small">
-                <p class="mb-0">&copy; {{ date('Y') }} TEZAN S.A.C. Todos los derechos reservados.</p>
-            </div>
-        </div>
+        <p class="small text-muted mt-5 mb-0">&copy; {{ date('Y') }} TEZAN S.A.C.</p>
     </div>
 </footer>

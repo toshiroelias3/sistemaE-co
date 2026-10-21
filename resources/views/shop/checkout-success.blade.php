@@ -11,16 +11,16 @@
                 <div class="d-inline-flex align-items-center justify-content-center bg-dark text-white rounded-circle mb-3" style="width: 70px; height: 70px;">
                     <i class="bi bi-check-lg fs-1"></i>
                 </div>
-                <h1 class="fw-bold text-uppercase tracking-wider mb-2">¡Gracias por tu compra!</h1>
+                <h1 class="fw-bold mb-2">¡Gracias por tu compra!</h1>
                 <p class="text-muted lead">Tu pedido ha sido registrado con éxito y ya lo estamos preparando.</p>
-                <div class="badge bg-light text-dark border p-2 px-3 text-uppercase tracking-wider font-monospace">
+                <div class="badge bg-light text-dark border p-2 px-3 font-monospace">
                     N° de Orden: {{ $order->reference_number }}
                 </div>
             </div>
 
             <!-- Detalles del Pedido -->
-            <div class="card border rounded-0 shadow-sm p-4 mb-4 bg-white">
-                <h5 class="fw-bold text-uppercase tracking-wider mb-4 border-bottom pb-2">Resumen de la Compra</h5>
+            <div class="card border border-dark p-4 mb-4 bg-white">
+                <h5 class="fw-bold mb-4 border-bottom pb-2">Resumen de la Compra</h5>
 
                 <div class="mb-4">
                     @foreach($order->items as $item)
@@ -38,7 +38,7 @@
                                 @endif
                             </div>
                             <div class="flex-grow-1">
-                                <h6 class="small fw-bold text-uppercase mb-1">{{ $item->product->name }}</h6>
+                                <h6 class="small mb-1">{{ $item->product->name }}</h6>
                                 <span class="d-block text-muted small">
                                     Talla: {{ $item->variant->size->name ?? 'N/A' }} | Color: {{ $item->variant->color->name ?? 'N/A' }}
                                 </span>
@@ -60,7 +60,7 @@
                         <span class="fw-bold">{{ $order->shipping_cost > 0 ? 'S/ ' . number_format($order->shipping_cost, 2) : 'Gratis' }}</span>
                     </div>
                     <div class="d-flex justify-content-between border-top pt-2">
-                        <span class="fw-bold text-uppercase h5 mb-0">Total Pagado</span>
+                        <span class="fw-bold h5 mb-0">Total Pagado</span>
                         <span class="fw-bold text-dark h5 mb-0">S/ {{ number_format($order->total_amount, 2) }}</span>
                     </div>
                 </div>
@@ -68,12 +68,12 @@
                 <!-- Información de Envío y Cliente -->
                 <div class="row g-4 border-top pt-3">
                     <div class="col-12 col-md-6">
-                        <h6 class="fw-bold text-uppercase small text-muted mb-2">Datos del Cliente</h6>
+                        <h6 class="fw-bold small text-muted mb-2">Datos del Cliente</h6>
                         <p class="small mb-1"><strong>Nombre:</strong> {{ $order->customer_name ?? $order->user->name }}</p>
                         <p class="small mb-0"><strong>Correo:</strong> {{ $order->customer_email ?? $order->user->email }}</p>
                     </div>
                     <div class="col-12 col-md-6">
-                        <h6 class="fw-bold text-uppercase small text-muted mb-2">Dirección de Entrega</h6>
+                        <h6 class="fw-bold small text-muted mb-2">Dirección de Entrega</h6>
                         <p class="small mb-1"><strong>Dirección:</strong> {{ $order->shipping_address }}</p>
                         <p class="small mb-0"><strong>Teléfono:</strong> {{ $order->phone }}</p>
                     </div>
@@ -82,11 +82,11 @@
 
             <!-- Botones de Acción -->
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                <a href="{{ route('home') }}" class="btn btn-dark rounded-0 text-uppercase tracking-wider fw-bold py-3 px-4">
+                <a href="{{ route('home') }}" class="btn btn-dark fw-bold py-3 px-4">
                     Volver a la Tienda
                 </a>
                 @auth
-                    <a href="{{ route('customer.orders.index') }}" class="btn btn-outline-dark rounded-0 text-uppercase tracking-wider fw-bold py-3 px-4">
+                    <a href="{{ route('customer.orders.index') }}" class="btn btn-outline-dark fw-bold py-3 px-4">
                         Ver Mis Pedidos
                     </a>
                 @endauth

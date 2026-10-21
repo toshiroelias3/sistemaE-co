@@ -1,12 +1,15 @@
 // 1. Configuración de fuentes y variables de Bootstrap
 $font-family-sans-serif: 'Inter', sans-serif;
-$primary: #1a1a1a; 
+$primary: #141413;
 $body-bg: #fcfcfc;
 
 // 2. Importar Bootstrap 5
 @import 'bootstrap/scss/bootstrap';
 
-// 3. Estilos personalizados para la estética de la tienda de ropa
+// 3. Sistema visual de la tienda pública (Damero limeño)
+@import 'damero';
+
+// 4. Estilos personalizados compartidos
 body {
     min-height: 100vh;
     display: flex;

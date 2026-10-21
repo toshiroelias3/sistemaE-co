@@ -1,156 +1,115 @@
 @extends('layouts.app')
 
 @section('title', $product->name)
-@section('meta_description', Str::limit($product->description ?? 'Prenda de diseño exclusivo con acabados de alta calidad por TEZAN.', 155))
+@section('meta_description', Str::limit($product->description ?? 'Prenda TEZAN hecha en Perú.', 155))
 
 @section('content')
-<!-- Migas de pan -->
-<nav aria-label="breadcrumb" class="small mb-4">
+@php
+    $colors = $product->variants->pluck('color')->filter()->unique('id');
+@endphp
+
+<nav aria-label="Ruta" class="small mb-4">
     <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-muted text-decoration-none">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('home') }}" class="link-dark">Inicio</a></li>
         @if($product->category)
-            <li class="breadcrumb-item"><a href="{{ route('home', ['category' => $product->category->id]) }}#catalogo" class="text-muted text-decoration-none">{{ $product->category->name }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('home', ['category' => $product->category->id]) }}#catalogo" class="link-dark">{{ $product->category->name }}</a></li>
         @endif
-        <li class="breadcrumb-item active text-dark" aria-current="page">{{ $product->name }}</li>
+        <li class="breadcrumb-item active" aria-current="page">{{ $product->name }}</li>
     </ol>
 </nav>
 
-<div class="row g-5">
-    <!-- Galería Multimedia Interactiva -->
-    <div class="col-12 col-md-6">
-        @if($product->images->isNotEmpty())
-            <!-- Imagen Principal (las imágenes ya vienen ordenadas con la portada primero) -->
-            <div class="mb-3 text-center bg-light p-2 border">
-                <img id="main-product-image"
-                     src="{{ asset('storage/' . $product->images->first()->image_path) }}"
-                     class="img-fluid"
-                     style="max-height: 560px; width: 100%; object-fit: cover; transition: opacity 0.2s ease-in-out;"
-                     alt="{{ $product->name }}">
-            </div>
-
-            <!-- Miniaturas Dinámicas (Hover / Clic) -->
-            @if($product->images->count() > 1)
-                <div class="d-flex gap-2 overflow-auto pb-2">
-                    @foreach($product->images as $index => $img)
-                        <button type="button" class="thumbnail-wrapper btn p-1 rounded-0 border {{ $index === 0 ? 'border-dark' : 'border-light-subtle' }}" aria-label="Ver imagen {{ $index + 1 }}">
-                            <img src="{{ asset('storage/' . $img->image_path) }}"
-                                 class="product-thumb"
-                                 style="width: 70px; height: 70px; object-fit: cover; display: block;"
-                                 data-large-src="{{ asset('storage/' . $img->image_path) }}"
-                                 loading="lazy"
-                                 alt="">
-                        </button>
-                    @endforeach
-                </div>
+<div class="row g-4 g-lg-5">
+    <!-- Galería -->
+    <div class="col-12 col-lg-7">
+        <div class="tz-gallery-main">
+            @if($product->images->isNotEmpty())
+                <img id="main-product-image" src="{{ asset('storage/' . $product->images->first()->image_path) }}" alt="{{ $product->name }}">
+            @else
+                <div class="h-100 d-flex align-items-center justify-content-center text-muted">Sin foto por ahora</div>
             @endif
-        @else
-            <div class="bg-light d-flex align-items-center justify-content-center border" style="height: 450px;">
-                <span class="text-muted text-uppercase tracking-wider">Sin imagen disponible</span>
+        </div>
+
+        @if($product->images->count() > 1)
+            <div class="tz-thumbs mt-1" role="group" aria-label="Fotos de la prenda">
+                @foreach($product->images as $index => $img)
+                    <button type="button" class="product-thumb" data-large-src="{{ asset('storage/' . $img->image_path) }}" aria-current="{{ $index === 0 ? 'true' : 'false' }}" aria-label="Ver foto {{ $index + 1 }}">
+                        <img src="{{ asset('storage/' . $img->image_path) }}" loading="lazy" alt="">
+                    </button>
+                @endforeach
             </div>
         @endif
     </div>
 
-    <!-- Detalles y Formulario de Selección -->
-    <div class="col-12 col-md-6">
-        <span class="text-uppercase small text-muted tracking-wider d-block mb-1">
-            {{ $product->category->name ?? 'Colección TEZAN' }}
-        </span>
-        <h1 class="fw-bold text-uppercase tracking-wider mb-2 h2">{{ $product->name }}</h1>
-        <p class="fw-bold text-dark mb-4 fs-3">S/ {{ number_format($product->base_price, 2) }}</p>
+    <!-- Datos y compra -->
+    <div class="col-12 col-lg-5">
+        <h1 class="display-5 mb-2">{{ $product->name }}</h1>
+        <p class="tz-price fs-3 mb-4">S/ {{ number_format($product->base_price, 2) }}</p>
 
-        <div class="border-top border-bottom py-3 mb-4">
-            <p class="text-secondary mb-0" style="white-space: pre-line;">{{ $product->description ?? 'Prenda de diseño exclusivo con acabados de alta calidad por TEZAN.' }}</p>
-        </div>
+        @if($product->description)
+            <p class="mb-4" style="white-space: pre-line; max-width: 60ch;">{{ $product->description }}</p>
+        @endif
 
         @if($sizes->isEmpty())
-            <div class="alert alert-light border rounded-0 small text-uppercase tracking-wider">Esta prenda no tiene stock disponible por el momento.</div>
+            <div class="tz-tile tz-ink">Esta prenda está agotada por ahora.</div>
         @else
-            <!-- Formulario de Selección e Intención de Compra -->
             <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="POST">
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                 <input type="hidden" name="buy_now" id="buy_now_input" value="0">
 
-                <!-- Selector de Talla -->
-                <div class="mb-3">
-                    <label for="size-select" class="form-label text-uppercase small fw-bold text-dark">Talla</label>
-                    <select id="size-select" name="size_id" class="form-select rounded-0 border-dark" required>
-                        <option value="">Seleccionar Talla...</option>
+                <fieldset class="mb-4">
+                    <legend class="fs-6 fw-semibold mb-2">Talla</legend>
+                    <div class="tz-choices">
                         @foreach($sizes as $size)
-                            <option value="{{ $size->id }}">{{ $size->name }}</option>
+                            <label class="tz-choice">
+                                <input type="radio" name="size_id" value="{{ $size->id }}" required>
+                                <span>{{ $size->name }}</span>
+                            </label>
                         @endforeach
-                    </select>
-                </div>
-
-                <!-- Selector de Color (se llena según la talla elegida) -->
-                <div class="mb-3">
-                    <label for="color-select" class="form-label text-uppercase small fw-bold text-dark">Color</label>
-                    <select id="color-select" name="color_id" class="form-select rounded-0 border-dark" required disabled>
-                        <option value="">Primero elige una talla...</option>
-                    </select>
-                </div>
-
-                <!-- Disponibilidad -->
-                <div id="stock-status" class="mb-3 small d-none" aria-live="polite">
-                    <span class="text-uppercase text-muted fw-medium">Disponibilidad:</span>
-                    <span id="stock-badge" class="badge rounded-0 px-2 ms-1"></span>
-                </div>
-
-                <!-- Control de Cantidad -->
-                <div class="mb-4">
-                    <label for="qty-input" class="form-label text-uppercase small fw-bold text-dark">Cantidad</label>
-                    <div class="input-group" style="max-width: 140px;">
-                        <button class="btn btn-outline-dark rounded-0 px-3" type="button" id="btn-qty-minus" aria-label="Restar una unidad">-</button>
-                        <input type="number" id="qty-input" name="quantity" class="form-control rounded-0 text-center border-dark" value="1" min="1" required>
-                        <button class="btn btn-outline-dark rounded-0 px-3" type="button" id="btn-qty-plus" aria-label="Sumar una unidad">+</button>
                     </div>
-                </div>
+                </fieldset>
 
-                <!-- Acciones Principales -->
-                <div class="d-grid gap-2">
-                    <!-- 1. Añadir al carrito (Abre el Offcanvas lateral) -->
-                    <button type="submit" id="btn-add-cart" class="btn btn-outline-dark rounded-0 text-uppercase tracking-wider fw-bold py-3" disabled>
-                        Agregar al carrito
-                    </button>
+                <fieldset class="mb-3">
+                    <legend class="fs-6 fw-semibold mb-2">Color</legend>
+                    <div class="tz-choices">
+                        @foreach($colors as $color)
+                            <label class="tz-choice">
+                                <input type="radio" name="color_id" value="{{ $color->id }}" required>
+                                <span><i class="tz-swatch" style="background: {{ $color->hex_code ?? 'transparent' }}"></i>{{ $color->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </fieldset>
 
-                    <!-- 2. Comprar ahora (Redirección directa a Checkout) -->
-                    <button type="submit" id="btn-buy-now" class="btn btn-dark rounded-0 text-uppercase tracking-wider fw-bold py-3" disabled>
-                        Comprar ahora
-                    </button>
+                <p id="stock-status" class="small mb-4" aria-live="polite">Elige talla y color para ver la disponibilidad.</p>
+
+                <div class="d-flex align-items-stretch gap-2 mb-3">
+                    <label for="qty-input" class="visually-hidden">Cantidad</label>
+                    <div class="input-group flex-nowrap" style="width: 140px;">
+                        <button class="btn btn-outline-dark px-3" type="button" id="btn-qty-minus" aria-label="Quitar una unidad">−</button>
+                        <input type="number" id="qty-input" name="quantity" class="form-control text-center" value="1" min="1" required>
+                        <button class="btn btn-outline-dark px-3" type="button" id="btn-qty-plus" aria-label="Agregar una unidad">+</button>
+                    </div>
+                    <button type="submit" id="btn-add-cart" class="btn btn-dark flex-grow-1 py-3" disabled>Agregar a la bolsa</button>
                 </div>
+                <button type="submit" id="btn-buy-now" class="btn btn-outline-dark w-100 py-3" disabled>Comprar ahora</button>
             </form>
         @endif
 
-        <!-- Información de servicio -->
-        <ul class="list-unstyled small text-muted mt-4 mb-0">
-            <li class="mb-2"><i class="bi bi-truck me-2 text-dark"></i> Envío gratis en compras desde S/ {{ number_format(\App\Support\Cart::FREE_SHIPPING_FROM, 0) }}</li>
-            <li class="mb-2"><i class="bi bi-shield-check me-2 text-dark"></i> Pago seguro con tarjeta o Yape</li>
-            <li><i class="bi bi-arrow-repeat me-2 text-dark"></i> Cambios de talla sin complicaciones</li>
+        <ul class="list-unstyled mt-5 mb-0">
+            <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>Hecho en Perú</li>
+            <li class="mb-2"><i class="bi bi-truck me-2"></i>Envío gratis desde S/ {{ number_format(\App\Support\Cart::FREE_SHIPPING_FROM, 0) }}; si no, S/ {{ number_format(\App\Support\Cart::SHIPPING_COST, 0) }}</li>
+            <li><i class="bi bi-credit-card me-2"></i>Paga con tarjeta o Yape</li>
         </ul>
     </div>
 </div>
 
-<!-- Prendas Relacionadas -->
 @if($relatedProducts->isNotEmpty())
-    <section class="mt-5 pt-5 border-top">
-        <h2 class="h6 fw-bold text-uppercase tracking-wider mb-4">También te puede gustar</h2>
-        <div class="row row-cols-2 row-cols-md-4 g-4">
+    <section class="mt-5 pt-4" aria-labelledby="relacionados">
+        <h2 id="relacionados" class="h1 mb-4">También te puede gustar</h2>
+        <div class="tz-grid">
             @foreach($relatedProducts as $related)
-                <div class="col">
-                    <a href="{{ route('shop.product', $related->slug) }}" class="card h-100 border-0 rounded-0 text-decoration-none product-hover-card">
-                        <div class="bg-light" style="height: 240px;">
-                            @if($related->images->isNotEmpty())
-                                <img src="{{ asset('storage/' . $related->images->first()->image_path) }}" class="w-100 h-100 object-fit-cover" loading="lazy" alt="{{ $related->name }}">
-                            @else
-                                <div class="h-100 d-flex align-items-center justify-content-center text-muted"><i class="bi bi-image fs-2"></i></div>
-                            @endif
-                        </div>
-                        <div class="card-body px-0">
-                            <h3 class="h6 text-dark mb-1" style="font-size: 0.9rem;">{{ $related->name }}</h3>
-                            <span class="fw-bold text-dark small">S/ {{ number_format($related->base_price, 2) }}</span>
-                        </div>
-                    </a>
-                </div>
+                @include('shop.partials.product-tile', ['product' => $related])
             @endforeach
         </div>
     </section>
@@ -160,104 +119,82 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Matriz de variantes (talla, color, stock) enviada desde el servidor
         const variants = @json($variantMatrix);
 
-        // 1. Intercambio Dinámico de Imagen Principal al pasar/hacer clic en miniaturas
+        // 1. Galería: la miniatura elegida pasa a la foto principal
         const mainImage = document.getElementById('main-product-image');
-        const wrappers = document.querySelectorAll('.thumbnail-wrapper');
-
-        wrappers.forEach((wrapper) => {
-            const thumb = wrapper.querySelector('.product-thumb');
-
-            function updateMainImage() {
-                if (mainImage) {
-                    mainImage.style.opacity = '0.4';
-                    setTimeout(() => {
-                        mainImage.src = thumb.getAttribute('data-large-src');
-                        mainImage.style.opacity = '1';
-                    }, 100);
-                }
-                wrappers.forEach(w => w.classList.replace('border-dark', 'border-light-subtle'));
-                wrapper.classList.replace('border-light-subtle', 'border-dark');
-            }
-
-            wrapper.addEventListener('mouseenter', updateMainImage);
-            wrapper.addEventListener('click', updateMainImage);
+        const thumbs = document.querySelectorAll('.product-thumb');
+        thumbs.forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                mainImage.style.opacity = '0.4';
+                setTimeout(() => { mainImage.src = thumb.dataset.largeSrc; mainImage.style.opacity = '1'; }, 100);
+                thumbs.forEach(t => t.setAttribute('aria-current', t === thumb ? 'true' : 'false'));
+            });
         });
 
         const form = document.getElementById('add-to-cart-form');
         if (!form) return;
 
-        // 2. Filtrado de colores por talla y estado de stock
-        const sizeSelect = document.getElementById('size-select');
-        const colorSelect = document.getElementById('color-select');
-        const stockStatus = document.getElementById('stock-status');
-        const stockBadge = document.getElementById('stock-badge');
+        // 2. Disponibilidad por talla y color
+        const sizeInputs = form.querySelectorAll('input[name="size_id"]');
+        const colorInputs = form.querySelectorAll('input[name="color_id"]');
+        const status = document.getElementById('stock-status');
         const qtyInput = document.getElementById('qty-input');
         const btnAddCart = document.getElementById('btn-add-cart');
         const btnBuyNow = document.getElementById('btn-buy-now');
         let maxStock = 0;
 
-        function setBuyable(enabled) {
-            btnAddCart.disabled = !enabled;
-            btnBuyNow.disabled = !enabled;
-        }
+        const checked = name => form.querySelector(`input[name="${name}"]:checked`)?.value;
+        const setBuyable = ok => { btnAddCart.disabled = !ok; btnBuyNow.disabled = !ok; };
 
-        sizeSelect.addEventListener('change', function () {
-            colorSelect.innerHTML = '<option value="">Seleccionar Color...</option>';
-            stockStatus.classList.add('d-none');
-            setBuyable(false);
+        function sync() {
+            const size = checked('size_id');
 
-            const options = variants.filter(v => String(v.size_id) === this.value);
-            options.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v.color_id;
-                opt.textContent = v.stock > 0 ? v.color_name : `${v.color_name} (agotado)`;
-                colorSelect.appendChild(opt);
+            // Colores que no existen o están agotados en la talla elegida
+            colorInputs.forEach(input => {
+                const v = variants.find(v => String(v.size_id) === size && String(v.color_id) === input.value);
+                input.disabled = Boolean(size) && (!v || v.stock < 1);
+                if (input.disabled && input.checked) input.checked = false;
             });
-            colorSelect.disabled = options.length === 0;
-        });
 
-        colorSelect.addEventListener('change', function () {
-            const match = variants.find(v => String(v.size_id) === sizeSelect.value && String(v.color_id) === this.value);
-            if (!match) {
-                stockStatus.classList.add('d-none');
+            const color = checked('color_id');
+            const match = variants.find(v => String(v.size_id) === size && String(v.color_id) === color);
+
+            if (!size || !color) {
+                status.textContent = size ? 'Ahora elige un color.' : 'Elige talla y color para ver la disponibilidad.';
                 setBuyable(false);
                 return;
             }
 
             maxStock = match.stock;
-            stockStatus.classList.remove('d-none');
+            qtyInput.max = maxStock;
+            if (parseInt(qtyInput.value) > maxStock) qtyInput.value = maxStock;
+            status.textContent = maxStock <= 3 ? `Quedan ${maxStock} en esta talla y color.` : 'Disponible.';
+            setBuyable(true);
+        }
 
-            if (match.stock > 0) {
-                stockBadge.className = 'badge rounded-0 px-2 ms-1 bg-success-subtle text-success';
-                stockBadge.textContent = match.stock <= 3 ? `¡Últimas ${match.stock} unidades!` : 'En stock';
-                qtyInput.max = match.stock;
-                if (parseInt(qtyInput.value) > match.stock) qtyInput.value = match.stock;
-                setBuyable(true);
-            } else {
-                stockBadge.className = 'badge rounded-0 px-2 ms-1 bg-danger-subtle text-danger';
-                stockBadge.textContent = 'Agotado temporalmente';
-                setBuyable(false);
-            }
-        });
+        sizeInputs.forEach(i => i.addEventListener('change', sync));
+        colorInputs.forEach(i => i.addEventListener('change', sync));
 
-        // 3. Control de Cantidad (+ / -) limitado al stock disponible
-        document.getElementById('btn-qty-minus').addEventListener('click', function () {
+        // Si solo hay una opción posible, se elige sola
+        if (sizeInputs.length === 1) sizeInputs[0].checked = true;
+        sync();
+        const enabledColors = [...colorInputs].filter(i => !i.disabled);
+        if (enabledColors.length === 1) { enabledColors[0].checked = true; sync(); }
+
+        // 3. Cantidad limitada al stock
+        document.getElementById('btn-qty-minus').addEventListener('click', () => {
             const current = parseInt(qtyInput.value) || 1;
             if (current > 1) qtyInput.value = current - 1;
         });
-
-        document.getElementById('btn-qty-plus').addEventListener('click', function () {
+        document.getElementById('btn-qty-plus').addEventListener('click', () => {
             const current = parseInt(qtyInput.value) || 1;
             if (!maxStock || current < maxStock) qtyInput.value = current + 1;
         });
 
-        // 4. Procesamiento AJAX Unificado (submitter indica qué botón se presionó)
+        // 4. Envío por AJAX; "Comprar ahora" va directo al checkout
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-
             const isBuyNow = e.submitter === btnBuyNow;
             document.getElementById('buy_now_input').value = isBuyNow ? '1' : '0';
             setBuyable(false);
@@ -277,26 +214,18 @@
             }))
             .then(data => {
                 if (isBuyNow) {
-                    // Comprar Ahora: Redirección inmediata a Checkout (Guest o Logueado)
                     window.location.href = "{{ route('checkout.index') }}";
                     return;
                 }
-
-                // Agregar al Carrito: Actualizar badge y abrir mini-carrito lateral
-                const cartBadge = document.getElementById('cart-count-badge');
-                if (cartBadge) {
-                    cartBadge.textContent = data.cart_count;
-                    cartBadge.classList.remove('d-none');
-                }
-
+                document.querySelectorAll('[data-cart-count]').forEach(el => el.textContent = data.cart_count);
                 document.getElementById('mini-cart-body').innerHTML = data.html;
                 bootstrap.Offcanvas.getOrCreateInstance(document.getElementById('miniCartCanvas')).show();
             })
             .catch(error => {
                 const firstValidationError = error.errors ? Object.values(error.errors)[0][0] : null;
-                alert(error.error || firstValidationError || 'Ocurrió un error al procesar la solicitud.');
+                status.textContent = error.error || firstValidationError || 'No se pudo agregar la prenda. Inténtalo de nuevo.';
             })
-            .finally(() => setBuyable(true));
+            .finally(sync);
         });
     });
 </script>

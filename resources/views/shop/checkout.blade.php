@@ -4,10 +4,10 @@
 
 @section('content')
 <div class="py-4">
-    <h1 class="h2 fw-bold text-uppercase tracking-wider mb-4">Proceso de Pago</h1>
+    <h1 class="h2 mb-4">Proceso de Pago</h1>
 
     @if ($errors->any())
-        <div class="alert alert-danger rounded-0 small mb-4">
+        <div class="alert alert-danger small mb-4">
             <ul class="mb-0">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -18,11 +18,11 @@
 
     <!-- Banner Opcional para Invitados -->
     @guest
-        <div class="alert alert-light border rounded-0 d-flex justify-content-between align-items-center mb-4 py-3">
-            <span class="small text-uppercase tracking-wider text-muted">
+        <div class="alert alert-light border d-flex justify-content-between align-items-center mb-4 py-3">
+            <span class="small text-muted">
                 <i class="bi bi-person-circle me-2"></i> ¿Ya tienes una cuenta registrada en TEZAN?
             </span>
-            <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-0 text-uppercase fw-bold">
+            <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm fw-bold">
                 Iniciar Sesión
             </a>
         </div>
@@ -31,56 +31,56 @@
     <div class="row g-5">
         <!-- Formulario de Checkout y Pago -->
         <div class="col-12 col-lg-7">
-            <form action="{{ route('checkout.store') }}" method="POST" class="card border rounded-0 p-4 bg-white shadow-sm">
+            <form action="{{ route('checkout.store') }}" method="POST" class="card border p-4 bg-white">
                 @csrf
 
                 <!-- Sección 1: Contacto -->
-                <h5 class="fw-bold text-uppercase tracking-wider mb-3 border-bottom pb-2">1. Información de Contacto</h5>
+                <h5 class="fw-bold mb-3 border-bottom pb-2">1. Información de Contacto</h5>
 
                 @auth
                     <div class="mb-3">
-                        <label for="auth_name" class="form-label small text-uppercase text-muted fw-semibold">Nombre Completo</label>
-                        <input type="text" id="auth_name" class="form-control rounded-0 border-dark-subtle bg-light" value="{{ Auth::user()->name }}" readonly>
+                        <label for="auth_name" class="form-label small text-muted fw-semibold">Nombre completo</label>
+                        <input type="text" id="auth_name" class="form-control border-dark-subtle bg-light" value="{{ Auth::user()->name }}" readonly>
                         <input type="hidden" name="customer_name" value="{{ Auth::user()->name }}">
                     </div>
                     <div class="mb-4">
-                        <label for="auth_email" class="form-label small text-uppercase text-muted fw-semibold">Correo Electrónico</label>
-                        <input type="email" id="auth_email" class="form-control rounded-0 border-dark-subtle bg-light" value="{{ Auth::user()->email }}" readonly>
+                        <label for="auth_email" class="form-label small text-muted fw-semibold">Correo electrónico</label>
+                        <input type="email" id="auth_email" class="form-control border-dark-subtle bg-light" value="{{ Auth::user()->email }}" readonly>
                         <input type="hidden" name="customer_email" value="{{ Auth::user()->email }}">
                     </div>
                 @else
                     <div class="mb-3">
-                        <label for="customer_name" class="form-label small text-uppercase text-muted fw-semibold">Nombre Completo *</label>
-                        <input type="text" id="customer_name" name="customer_name" class="form-control rounded-0 border-dark-subtle" placeholder="Ej: Andrea García" value="{{ old('customer_name') }}" required>
+                        <label for="customer_name" class="form-label small text-muted fw-semibold">Nombre completo *</label>
+                        <input type="text" id="customer_name" name="customer_name" class="form-control border-dark-subtle" placeholder="Ej: Andrea García" value="{{ old('customer_name') }}" required>
                     </div>
                     <div class="mb-4">
-                        <label for="customer_email" class="form-label small text-uppercase text-muted fw-semibold">Correo Electrónico *</label>
-                        <input type="email" id="customer_email" name="customer_email" class="form-control rounded-0 border-dark-subtle" placeholder="Ej: cliente@correo.com" value="{{ old('customer_email') }}" required>
+                        <label for="customer_email" class="form-label small text-muted fw-semibold">Correo electrónico *</label>
+                        <input type="email" id="customer_email" name="customer_email" class="form-control border-dark-subtle" placeholder="Ej: cliente@correo.com" value="{{ old('customer_email') }}" required>
                         <div class="form-text small text-muted">Te enviaremos la confirmación del pedido y número de seguimiento a este correo.</div>
                     </div>
                 @endauth
 
                 <!-- Sección 2: Envío -->
-                <h5 class="fw-bold text-uppercase tracking-wider mb-3 border-bottom pb-2 pt-2">2. Dirección de Entrega</h5>
+                <h5 class="fw-bold mb-3 border-bottom pb-2 pt-2">2. Dirección de Entrega</h5>
 
                 <div class="mb-3">
-                    <label for="shipping_address" class="form-label small text-uppercase text-muted fw-semibold">Dirección Exacta *</label>
-                    <input type="text" id="shipping_address" name="shipping_address" class="form-control rounded-0 border-dark-subtle" placeholder="Ej: Av. Las Palmeras 123, Dpto 402" value="{{ old('shipping_address') }}" required>
+                    <label for="shipping_address" class="form-label small text-muted fw-semibold">Dirección Exacta *</label>
+                    <input type="text" id="shipping_address" name="shipping_address" class="form-control border-dark-subtle" placeholder="Ej: Av. Las Palmeras 123, Dpto 402" value="{{ old('shipping_address') }}" required>
                 </div>
 
                 <div class="row g-3 mb-4">
                     <div class="col-12 col-md-6">
-                        <label for="city" class="form-label small text-uppercase text-muted fw-semibold">Ciudad / Distrito *</label>
-                        <input type="text" id="city" name="city" class="form-control rounded-0 border-dark-subtle" placeholder="Ej: San Isidro, Lima" value="{{ old('city') }}" required>
+                        <label for="city" class="form-label small text-muted fw-semibold">Ciudad / Distrito *</label>
+                        <input type="text" id="city" name="city" class="form-control border-dark-subtle" placeholder="Ej: San Isidro, Lima" value="{{ old('city') }}" required>
                     </div>
                     <div class="col-12 col-md-6">
-                        <label for="phone" class="form-label small text-uppercase text-muted fw-semibold">Teléfono Celular *</label>
-                        <input type="tel" id="phone" name="phone" class="form-control rounded-0 border-dark-subtle" placeholder="Ej: 987654321" value="{{ old('phone') }}" required>
+                        <label for="phone" class="form-label small text-muted fw-semibold">Teléfono Celular *</label>
+                        <input type="tel" id="phone" name="phone" class="form-control border-dark-subtle" placeholder="Ej: 987654321" value="{{ old('phone') }}" required>
                     </div>
                 </div>
 
                 <!-- Sección 3: Métodos de Pago -->
-                <h5 class="fw-bold text-uppercase tracking-wider mb-3 border-bottom pb-2 pt-2">3. Pago</h5>
+                <h5 class="fw-bold mb-3 border-bottom pb-2 pt-2">3. Pago</h5>
                 <p class="text-muted small mb-3">Todas las transacciones son seguras y están encriptadas.</p>
 
                 <div class="mb-4">
@@ -89,7 +89,7 @@
                         <div class="form-check d-flex align-items-center justify-content-between">
                             <div>
                                 <input class="form-check-input me-2" type="radio" name="payment_method" id="pay_card" value="card" {{ old('payment_method', 'card') === 'card' ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold small text-uppercase" for="pay_card">
+                                <label class="form-check-label fw-bold small" for="pay_card">
                                     Tarjeta de crédito y débito
                                 </label>
                             </div>
@@ -101,22 +101,22 @@
                         <!-- Formulario de Tarjeta -->
                         <div id="card-fields" class="mt-3 pt-3 border-top">
                             <div class="mb-3">
-                                <label class="form-label small text-muted text-uppercase fw-semibold mb-1">Número de tarjeta *</label>
-                                <input type="text" class="form-control rounded-0 border-dark-subtle" placeholder="1234 1234 1234 1234" maxlength="19">
+                                <label class="form-label small text-muted fw-semibold mb-1">Número de tarjeta *</label>
+                                <input type="text" class="form-control border-dark-subtle" placeholder="1234 1234 1234 1234" maxlength="19">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small text-muted text-uppercase fw-semibold mb-1">Nombre del titular *</label>
-                                <input type="text" class="form-control rounded-0 border-dark-subtle" placeholder="Ej.: María López">
+                                <label class="form-label small text-muted fw-semibold mb-1">Nombre del titular *</label>
+                                <input type="text" class="form-control border-dark-subtle" placeholder="Ej.: María López">
                                 <div class="form-text text-xs text-muted" style="font-size: 0.75rem;">Complétalo como aparece en la tarjeta.</div>
                             </div>
                             <div class="row g-2">
                                 <div class="col-6">
-                                    <label class="form-label small text-muted text-uppercase fw-semibold mb-1">Vencimiento *</label>
-                                    <input type="text" class="form-control rounded-0 border-dark-subtle" placeholder="MM/AA" maxlength="5">
+                                    <label class="form-label small text-muted fw-semibold mb-1">Vencimiento *</label>
+                                    <input type="text" class="form-control border-dark-subtle" placeholder="MM/AA" maxlength="5">
                                 </div>
                                 <div class="col-6">
-                                    <label class="form-label small text-muted text-uppercase fw-semibold mb-1">Código de seguridad *</label>
-                                    <input type="text" class="form-control rounded-0 border-dark-subtle" placeholder="Ej.: 123" maxlength="4">
+                                    <label class="form-label small text-muted fw-semibold mb-1">Código de seguridad *</label>
+                                    <input type="text" class="form-control border-dark-subtle" placeholder="Ej.: 123" maxlength="4">
                                 </div>
                             </div>
                         </div>
@@ -127,7 +127,7 @@
                         <div class="form-check d-flex align-items-center justify-content-between">
                             <div>
                                 <input class="form-check-input me-2" type="radio" name="payment_method" id="pay_yape" value="yape" {{ old('payment_method') === 'yape' ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold small text-uppercase" for="pay_yape">
+                                <label class="form-check-label fw-bold small" for="pay_yape">
                                     Yape / Plin / Transferencia
                                 </label>
                             </div>
@@ -144,14 +144,14 @@
 
                 <!-- Términos y Condiciones -->
                 <div class="form-check mb-4">
-                    <input class="form-check-input rounded-0" type="checkbox" id="terms" name="terms" required>
+                    <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
                     <label class="form-check-label small text-muted" for="terms">
                         He leído y estoy de acuerdo con los <a href="#" class="text-dark text-decoration-underline">términos y condiciones</a> de la web *
                     </label>
                 </div>
 
                 <!-- Botón Confirmar (se deshabilita al enviar para evitar pedidos duplicados) -->
-                <button type="submit" class="btn btn-dark w-100 rounded-0 text-uppercase tracking-wider fw-bold py-3" onclick="setTimeout(() => this.disabled = true, 0)">
+                <button type="submit" class="btn btn-dark w-100 fw-bold py-3" onclick="setTimeout(() => this.disabled = true, 0)">
                     <i class="bi bi-lock-fill me-2"></i> Realizar el Pedido
                 </button>
             </form>
@@ -159,11 +159,11 @@
 
         <!-- Resumen del Pedido -->
         <div class="col-12 col-lg-5">
-            <div class="card border rounded-0 p-4 bg-light shadow-sm">
-                <h5 class="fw-bold text-uppercase tracking-wider mb-4 border-bottom pb-2">Resumen de la Orden</h5>
+            <div class="card border p-4 bg-light">
+                <h5 class="fw-bold mb-4 border-bottom pb-2">Resumen de la Orden</h5>
 
                 @if(empty($cart))
-                    <p class="text-muted text-uppercase small">No hay prendas en tu bolsa.</p>
+                    <p class="text-muted small">No hay prendas en tu bolsa.</p>
                 @else
                     <div class="mb-4">
                         @foreach($cart as $item)
@@ -180,7 +180,7 @@
                                     @endif
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h6 class="small fw-bold text-uppercase mb-1" style="font-size: 0.85rem;">{{ $item['name'] }}</h6>
+                                    <h6 class="small mb-1" style="font-size: 0.85rem;">{{ $item['name'] }}</h6>
                                     <span class="d-block text-muted small" style="font-size: 0.75rem;">Talla: {{ $item['size_name'] }} | Color: {{ $item['color_name'] }}</span>
                                     <span class="small fw-semibold text-dark">{{ $item['quantity'] }} x S/ {{ number_format($item['price'], 2) }}</span>
                                 </div>
@@ -199,12 +199,12 @@
                         @if($shippingCost > 0)
                             <span class="fw-bold text-dark">S/ {{ number_format($shippingCost, 2) }}</span>
                         @else
-                            <span class="fw-bold text-success text-uppercase small">Gratis</span>
+                            <span class="fw-bold text-success small">Gratis</span>
                         @endif
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <span class="fw-bold text-uppercase h5 mb-0">Total</span>
+                        <span class="fw-bold h5 mb-0">Total</span>
                         <span class="fw-bold text-dark h5 mb-0">S/ {{ number_format($subtotal + $shippingCost, 2) }}</span>
                     </div>
                 @endif
