@@ -52,6 +52,14 @@
             <a href="{{ route('admin.customers.index') }}" class="nav-link {{ Request::is('admin/customers*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i> Clientes
             </a>
+
+            @php $pendingComplaints = \App\Models\Complaint::where('status', 'pendiente')->count(); @endphp
+            <a href="{{ route('admin.complaints.index') }}" class="nav-link {{ Request::is('admin/reclamaciones*') ? 'active' : '' }}">
+                <i class="bi bi-journal-text"></i> Reclamaciones
+                @if($pendingComplaints)
+                    <span class="badge bg-warning text-dark rounded-pill ms-auto">{{ $pendingComplaints }}</span>
+                @endif
+            </a>
             
             <a href="{{ route('home') }}" class="nav-link border-top border-secondary border-opacity-10 mt-4">
                 <i class="bi bi-arrow-left-short"></i> Ver Tienda

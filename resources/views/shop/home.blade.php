@@ -44,6 +44,27 @@
     @endforeach
 </nav>
 
+<!-- Filas por categoría -->
+@foreach($rows as $row)
+    <section class="container-fluid px-3 px-lg-5 mb-5" aria-labelledby="fila-{{ $loop->index }}">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <h2 id="fila-{{ $loop->index }}" class="tz-display fs-2 mb-0">{{ $row['title'] }}</h2>
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ $row['link'] }}" class="tz-label link-dark">Ver todo</a>
+                <div class="tz-row-arrows d-none d-lg-flex gap-1">
+                    <button type="button" data-row-scroll="-1" aria-label="Anterior"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" data-row-scroll="1" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="tz-row" tabindex="0" aria-label="{{ $row['title'] }}">
+            @foreach($row['products'] as $product)
+                @include('shop.partials.product-tile', ['product' => $product])
+            @endforeach
+        </div>
+    </section>
+@endforeach
+
 <!-- Catálogo -->
 <section class="container-fluid px-3 px-lg-5 pb-5" id="catalogo" aria-labelledby="catalogo-titulo">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
@@ -151,3 +172,13 @@
 </section>
 @endsection
 
+
+@push('scripts')
+<script>
+    // Flechas de las filas deslizables
+    document.querySelectorAll('[data-row-scroll]').forEach(button => {
+        const row = button.closest('section').querySelector('.tz-row');
+        button.addEventListener('click', () => row.scrollBy({ left: row.clientWidth * button.dataset.rowScroll, behavior: 'smooth' }));
+    });
+</script>
+@endpush

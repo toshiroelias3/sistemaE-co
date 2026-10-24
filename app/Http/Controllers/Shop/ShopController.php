@@ -93,7 +93,34 @@ class ShopController extends Controller
             return ['category' => $category, 'image' => $image];
         })->filter(fn ($item) => $item['image']);
 
-        return view('shop.home', compact('products', 'categories', 'featured', 'editorial'));
+        // 9. Filas deslizables de la portada (solo sin filtros ni búsqueda): novedades y una por categoría
+        $rows = collect();
+        if (!$request->hasAny(['q', 'category', 'sort', 'page'])) {
+            $withImages = ['images' => fn ($q) => $q->orderBy('is_primary', 'desc')];
+
+            $rows->push([
+                'title' => 'Novedades',
+                'link' => route('home', ['sort' => 'newest']) . '#catalogo',
+                'products' => Product::where('is_active', true)->with($withImages)->latest()->take(8)->get(),
+            ]);
+
+            foreach ($categories as $category) {
+                $ids = $category->children->pluck('id')->push($category->id);
+                $categoryProducts = Product::where('is_active', true)->whereIn('category_id', $ids)->with($withImages)->latest()->take(8)->get();
+
+                if ($categoryProducts->count() >= 2) {
+                    $rows->push([
+                        'title' => $category->name,
+                        'link' => route('home', ['category' => $category->id]) . '#catalogo',
+                        'products' => $categoryProducts,
+                    ]);
+                }
+            }
+
+            $rows = $rows->filter(fn ($row) => $row['products']->count() >= 2);
+        }
+
+        return view('shop.home', compact('products', 'categories', 'featured', 'editorial', 'rows'));
     }
 
     /**

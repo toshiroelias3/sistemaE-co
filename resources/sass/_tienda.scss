@@ -316,3 +316,51 @@
 
 // Margen de página de 16px en celular
 .tz .container { --bs-gutter-x: 2rem; }
+
+// ---------- Botón flotante de WhatsApp ----------
+.tz-whatsapp {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1040;
+    width: 3.25rem;
+    height: 3.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #25d366;
+    color: #fff;
+    font-size: 1.6rem;
+    box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.18);
+    transition: transform 0.2s var(--tz-ease);
+    &:hover { color: #fff; transform: scale(1.06); }
+
+    @media (min-width: 992px) { right: 1.5rem; bottom: 1.5rem; }
+}
+
+// ---------- Filas deslizables por categoría ----------
+.tz-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 46%;
+    gap: 4px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+    > * { scroll-snap-align: start; }
+
+    @media (min-width: 768px) { grid-auto-columns: 30%; }
+    @media (min-width: 992px) { grid-auto-columns: calc((100% - 12px) / 4); }
+}
+
+.tz-row-arrows button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--tz-line);
+    background: var(--tz-paper);
+    color: var(--tz-ink);
+    &:hover { border-color: var(--tz-ink); }
+    &:disabled { opacity: 0.35; }
+}

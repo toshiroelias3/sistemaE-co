@@ -11,6 +11,8 @@ use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
 use App\Http\Controllers\Shop\CustomerOrderController;
 use App\Http\Controllers\Shop\SeoController;
+use App\Http\Controllers\Shop\ComplaintController;
+use App\Http\Controllers\Admin\ComplaintController as AdminComplaintController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +25,15 @@ use App\Http\Controllers\Shop\SeoController;
 // ==========================================
 Route::get('/', [ShopController::class, 'index'])->name('home');
 Route::get('/producto/{slug}', [ShopController::class, 'show'])->name('shop.product');
+
+// Libro de Reclamaciones virtual
+Route::get('/libro-de-reclamaciones', [ComplaintController::class, 'create'])->name('complaints.create');
+Route::post('/libro-de-reclamaciones', [ComplaintController::class, 'store'])->middleware('throttle:5,1')->name('complaints.store');
+Route::get('/libro-de-reclamaciones/constancia/{token}', [ComplaintController::class, 'show'])->name('complaints.show');
+
+// Páginas de ayuda
+Route::view('/preguntas-frecuentes', 'shop.pages.faq')->name('pages.faq');
+Route::view('/envios-y-pagos', 'shop.pages.shipping')->name('pages.shipping');
 
 // SEO: mapa del sitio y reglas para buscadores
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
@@ -87,6 +98,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Definir foto principal/portada del producto
     Route::post('/products/{product}/images/{image}/set-primary', [ProductController::class, 'setPrimaryImage'])->name('products.images.setPrimary');
+
+    // Libro de Reclamaciones
+    Route::get('/reclamaciones', [AdminComplaintController::class, 'index'])->name('complaints.index');
+    Route::get('/reclamaciones/{complaint}', [AdminComplaintController::class, 'show'])->name('complaints.show');
+    Route::put('/reclamaciones/{complaint}', [AdminComplaintController::class, 'update'])->name('complaints.update');
 
     // Clientes registrados
     Route::get('/customers', [AdminController::class, 'customers'])->name('customers.index');

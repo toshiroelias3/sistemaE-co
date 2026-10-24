@@ -8,7 +8,10 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Size;
 use App\Models\User;
+use App\Mail\ComplaintRegistered;
+use App\Models\Complaint;
 use App\Support\ProductImages;
+use Illuminate\Support\Facades\Mail;
 use Database\Seeders\InitialStoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -235,6 +238,75 @@ class StoreFlowTest extends TestCase
         $this->actingAs($this->admin())->delete(route('admin.products.images.destroy', $image));
         Storage::disk('public')->assertMissing($image->image_path);
         Storage::disk('public')->assertMissing(ProductImages::derivativePath($image->image_path, 400));
+    }
+
+    private function complaintData(array $overrides = []): array
+    {
+        return array_merge([
+            'consumer_name' => 'Ana Test',
+            'document_type' => 'DNI',
+            'document_number' => '12345678',
+            'address' => 'Av. Siempre Viva 123, Lima',
+            'phone' => '987654321',
+            'email' => 'ana@example.com',
+            'item_type' => 'producto',
+            'order_reference' => 'TZN-20261024-ABC',
+            'amount' => 120,
+            'item_description' => 'Polo Básico talla S',
+            'type' => 'reclamo',
+            'detail' => 'La prenda llegó con una costura abierta.',
+            'consumer_request' => 'Cambio por una prenda nueva.',
+            'accepted' => '1',
+        ], $overrides);
+    }
+
+    public function test_complaint_book_registers_a_numbered_sheet_and_emails_a_copy(): void
+    {
+        Mail::fake();
+
+        $response = $this->post(route('complaints.store'), $this->complaintData());
+
+        $complaint = Complaint::firstOrFail();
+        $this->assertSame('LR-' . now()->format('Y') . '-' . str_pad($complaint->id, 6, '0', STR_PAD_LEFT), $complaint->code);
+        $this->assertSame('pendiente', $complaint->status);
+        $response->assertRedirect(route('complaints.show', $complaint->token));
+        Mail::assertSent(ComplaintRegistered::class, fn ($mail) => $mail->hasTo('ana@example.com'));
+
+        $this->get(route('complaints.show', $complaint->token))->assertOk()->assertSee($complaint->code)->assertSee('costura abierta');
+
+        // El administrador responde y el consumidor lo ve en su constancia
+        $this->actingAs($this->admin())
+            ->put(route('admin.complaints.update', $complaint), ['response' => 'Te enviamos una prenda nueva.'])
+            ->assertRedirect(route('admin.complaints.show', $complaint));
+        $this->assertSame('respondido', $complaint->fresh()->status);
+        $this->get(route('complaints.show', $complaint->token))->assertSee('Te enviamos una prenda nueva.');
+    }
+
+    public function test_minors_must_name_a_guardian_in_the_complaint_book(): void
+    {
+        $this->post(route('complaints.store'), $this->complaintData(['is_minor' => '1']))
+            ->assertSessionHasErrors('guardian_name');
+        $this->assertSame(0, Complaint::count());
+    }
+
+    public function test_help_pages_render_and_whatsapp_shows_only_when_configured(): void
+    {
+        $this->get(route('pages.faq'))->assertOk()->assertSee('FAQPage', false)->assertSee('S/ 200');
+        $this->get(route('pages.shipping'))->assertOk();
+        $this->get(route('complaints.create'))->assertOk();
+
+        $this->get(route('home'))->assertSee('Libro de Reclamaciones')->assertDontSee('wa.me', false);
+
+        config(['tienda.whatsapp' => '51900000000']);
+        $this->get(route('home'))->assertSee('https://wa.me/51900000000', false);
+    }
+
+    public function test_home_shows_category_rows_only_without_filters(): void
+    {
+        Product::create(['category_id' => $this->product->category_id, 'name' => 'Polo Dos', 'slug' => 'polo-dos', 'base_price' => 50, 'is_active' => true]);
+
+        $this->get(route('home'))->assertSee('class="tz-row"', false)->assertSee('Novedades');
+        $this->get(route('home', ['q' => 'polo']))->assertDontSee('class="tz-row"', false);
     }
 
     public function test_clients_cannot_open_the_admin_panel(): void

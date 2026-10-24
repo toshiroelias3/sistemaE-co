@@ -5,6 +5,13 @@
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
+@foreach(['pages.faq', 'pages.shipping', 'complaints.create'] as $page)
+    <url>
+        <loc>{{ route($page) }}</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.3</priority>
+    </url>
+@endforeach
 @foreach($categories as $category)
     <url>
         <loc>{{ route('home', ['category' => $category->id]) }}</loc>
