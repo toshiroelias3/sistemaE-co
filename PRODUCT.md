@@ -17,7 +17,7 @@ Prendas hechas en Perú, con telas de calidad y buen fit, a precio accesible, de
 
 ## Operating Context
 - Moneda: soles (S/). Envío S/ 12, gratis desde S/ 250 (desde el 2026-10-24; antes S/ 200), despachos a todo el Perú.
-- Pago: tarjeta de crédito/débito o Yape/Plin (el pago está simulado en el código actual).
+- Pago: solo Yape (manual). Ver Brand Commitments.
 - Cada prenda tiene variantes por talla (S, M, L, XL) y color, con stock por variante.
 - Secciones Varones y Mujeres. Categorías (2026-10-24): Polos clásicos, Poleras, Conjuntos polera y pantalón, Conjuntos casaca y pantalón buzo, Polos piqué con cuello (varones y mujeres); Tops (solo mujeres); Polos waffle (solo varones). Cada prenda es de varón, de mujer o unisex.
 - Panel admin: productos, categorías, pedidos (con estados logísticos y de pago), clientes y alertas de stock bajo.
@@ -33,7 +33,8 @@ Prendas hechas en Perú, con telas de calidad y buen fit, a precio accesible, de
 - Estética "old money" / atemporal: es identidad de marca y debe mantenerse.
 - La tienda debe leerse de inmediato como un e-commerce de moda convencional, con Zara como referencia de nivel (preferencia confirmada el 2026-10-20, tras descartar una dirección conceptual "Damero limeño"). Lo que se descartó: el blanco y negro plano y la portada tipo póster con la marca gigante. La calidez viene de la fotografía.
 - Existe un logo propio. **Pendiente:** el archivo aún no está en el repositorio; hoy el sitio usa la palabra "TEZAN" en texto.
-- Contacto mostrado: soporte@tezan.com; Yape 942 817 550 (titular TEZAN S.A.C.).
+- Contacto: tezancompany@gmail.com; WhatsApp y Yape 942 817 550 (titular TEZAN S.A.C.). RUC 20616005163, Av. Lima 767.
+- Pago (desde 2026-10-24): solo Yape, confirmado manualmente por el admin. Los pedidos nacen "pendiente" + "por pagar".
 
 ## Evidence on Hand
 - Redes sociales activas. **Pendiente:** las URLs reales; hoy los íconos de Instagram/Facebook del footer apuntan a "#".

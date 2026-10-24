@@ -5,7 +5,7 @@
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
-@foreach(['pages.faq', 'pages.shipping', 'complaints.create'] as $page)
+@foreach(['pages.faq', 'pages.shipping', 'pages.terms', 'pages.privacy', 'complaints.create'] as $page)
     <url>
         <loc>{{ route($page) }}</loc>
         <changefreq>monthly</changefreq>

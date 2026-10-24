@@ -19,8 +19,8 @@
 
         <h2 class="tz-label mt-5 mb-3">Pagos</h2>
         <ul>
-            <li>Tarjeta de crédito o débito.</li>
-            <li>Yape.</li>
+            <li>Yape: al confirmar tu pedido te mostramos el monto exacto y el número. Envíanos la captura por WhatsApp con tu número de pedido.</li>
+            <li>Separamos tus prendas mientras validamos el pago y te avisamos por correo cuando lo confirmemos.</li>
         </ul>
         <p>Todos los precios están en soles (S/).</p>
 

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PaymentConfirmed;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Order;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
@@ -59,6 +62,7 @@ class AdminOrderController extends Controller
 
         $order = Order::with('items')->findOrFail($id);
         $wasCancelled = $order->status === 'cancelled';
+        $paymentJustConfirmed = $order->payment_status !== 'paid' && $request->payment_status === 'paid';
         $isCancelled = $request->status === 'cancelled';
 
         try {
@@ -89,6 +93,16 @@ class AdminOrderController extends Controller
         $message = $isCancelled && !$wasCancelled
             ? 'Pedido cancelado. Las prendas fueron devueltas al inventario.'
             : 'Estados del pedido actualizados correctamente.';
+
+        // Avisar al cliente que su Yape fue validado
+        if ($paymentJustConfirmed && $order->customer_email) {
+            try {
+                Mail::to($order->customer_email)->send(new PaymentConfirmed($order));
+                $message .= ' Le avisamos al cliente por correo que su pago fue confirmado.';
+            } catch (\Throwable $e) {
+                Log::error("No se pudo enviar la confirmación de pago del pedido {$order->reference_number}: {$e->getMessage()}");
+            }
+        }
 
         return redirect()->route('admin.orders.show', $order->id)->with('success', $message);
     }

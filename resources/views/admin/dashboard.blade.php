@@ -5,6 +5,21 @@
     <h2 class="fw-light text-uppercase tracking-wider m-0">Resumen Operativo</h2>
 </div>
 
+@if($usesDefaultPassword)
+    <div class="alert alert-danger rounded-0 small">
+        <i class="bi bi-shield-exclamation me-2"></i><strong>Tu cuenta usa la contraseña por defecto.</strong>
+        Cámbiala antes de publicar la tienda: <code>php artisan tinker</code> y luego
+        <code>User::where('email', '{{ Auth::user()->email }}')->first()->update(['password' => 'tu-nueva-clave'])</code>.
+    </div>
+@endif
+
+@if($pendingPayments)
+    <div class="alert alert-warning rounded-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span><i class="bi bi-phone me-2"></i><strong>{{ $pendingPayments }} {{ $pendingPayments === 1 ? 'pedido espera' : 'pedidos esperan' }}</strong> que valides su pago por Yape.</span>
+        <a href="{{ route('admin.orders.index', ['status' => 'pending']) }}" class="btn btn-sm btn-dark rounded-0">Revisar pagos</a>
+    </div>
+@endif
+
 <div class="row g-4 mb-5">
     <div class="col-12 col-sm-6 col-xl-3">
         <div class="card border-0 shadow-sm rounded-0 bg-white">

@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -66,6 +69,46 @@ class AuthController extends Controller
         Auth::login($user);
 
         return redirect()->route('home')->with('success', 'Cuenta creada con éxito. ¡Bienvenido a TEZAN!');
+    }
+
+    // Formulario para pedir el enlace de recuperación
+    public function showForgotPassword() {
+        return view('auth.forgot-password');
+    }
+
+    // Envía el enlace de recuperación (mismo mensaje exista o no el correo, para no revelar cuentas)
+    public function sendResetLink(Request $request) {
+        $request->validate(['email' => ['required', 'email']]);
+
+        Password::sendResetLink($request->only('email'));
+
+        return back()->with('success', 'Si el correo está registrado, te enviamos un enlace para crear una nueva contraseña. Revisa tu bandeja de entrada y la carpeta de spam.');
+    }
+
+    // Formulario para elegir la nueva contraseña (llega desde el enlace del correo)
+    public function showResetPassword(Request $request, string $token) {
+        return view('auth.reset-password', ['token' => $token, 'email' => $request->query('email')]);
+    }
+
+    // Guarda la nueva contraseña
+    public function resetPassword(Request $request) {
+        $request->validate([
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill(['password' => $password, 'remember_token' => Str::random(60)])->save();
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('success', 'Tu contraseña fue actualizada. Ya puedes iniciar sesión.')
+            : back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
     }
 
     // Cierra la sesión de forma segura

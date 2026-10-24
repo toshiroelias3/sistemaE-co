@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderPlaced;
 use App\Models\Order;
 use App\Models\ProductVariant;
 use App\Support\Cart;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
@@ -56,7 +58,7 @@ class CheckoutController extends Controller
             'shipping_address' => 'required|string|max:255',
             'city'             => 'required|string|max:255',
             'phone'            => ['required', 'string', 'max:30', 'regex:/^[0-9+\s-]{6,30}$/'],
-            'payment_method'   => 'required|in:card,yape',
+            'payment_method'   => 'required|in:yape',
             'terms'            => 'accepted',
         ], [
             'phone.regex'    => 'Ingresa un número de teléfono válido.',
@@ -108,8 +110,8 @@ class CheckoutController extends Controller
                 'total_amount'     => $totalAmount,
                 'shipping_address' => $fullAddress,
                 'phone'            => strip_tags($request->phone),
-                'status'           => 'processing', // Estado inicial
-                'payment_status'   => 'paid',       // Simulación de pago aprobado
+                'status'           => 'pending', // Se pasa a "procesando" cuando el admin valida el Yape
+                'payment_status'   => 'unpaid',
             ]);
 
             // D) Registrar los ítems y restar stock real
@@ -129,7 +131,14 @@ class CheckoutController extends Controller
             // E) Limpiar el carrito de la sesión tras la compra exitosa
             session()->forget('cart');
 
-            // F) Redirigir a la pantalla de agradecimiento con el número de orden
+            // F) Correo con el resumen y las instrucciones de Yape (si falla, el pedido igual queda registrado)
+            try {
+                Mail::to($order->customer_email)->send(new OrderPlaced($order->load('items.product', 'items.variant.size', 'items.variant.color')));
+            } catch (\Throwable $e) {
+                Log::error("No se pudo enviar la confirmación del pedido {$order->reference_number}: {$e->getMessage()}");
+            }
+
+            // G) Redirigir a la pantalla de agradecimiento con el número de orden
             return redirect()->route('checkout.success', $order->reference_number);
 
         } catch (\RuntimeException $e) {

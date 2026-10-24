@@ -13,12 +13,20 @@
                 <div class="d-inline-flex align-items-center justify-content-center bg-dark text-white rounded-circle mb-3" style="width: 70px; height: 70px;">
                     <i class="bi bi-check-lg fs-1"></i>
                 </div>
-                <h1 class="fw-bold mb-2">¡Gracias por tu compra!</h1>
-                <p class="text-muted lead">Tu pedido ha sido registrado con éxito y ya lo estamos preparando.</p>
-                <div class="badge bg-light text-dark border p-2 px-3 font-monospace">
-                    N° de Orden: {{ $order->reference_number }}
+                <h1 class="mb-2">¡Gracias por tu compra!</h1>
+                @if($order->payment_status === 'paid')
+                    <p class="text-muted lead">Tu pago está confirmado y ya estamos preparando tu pedido.</p>
+                @else
+                    <p class="text-muted lead">Tu pedido está reservado. Págalo con Yape para completarlo.</p>
+                @endif
+                <div class="badge bg-light text-dark border p-2 px-3">
+                    N.° de pedido: {{ $order->reference_number }}
                 </div>
             </div>
+
+            @if($order->payment_status !== 'paid' && $order->status !== 'cancelled')
+                @include('shop.partials.yape-instructions', ['order' => $order])
+            @endif
 
             <!-- Detalles del Pedido -->
             <div class="card border border-dark p-4 mb-4 bg-white">
@@ -62,7 +70,7 @@
                         <span class="fw-bold">{{ $order->shipping_cost > 0 ? 'S/ ' . number_format($order->shipping_cost, 2) : 'Gratis' }}</span>
                     </div>
                     <div class="d-flex justify-content-between border-top pt-2">
-                        <span class="fw-bold h5 mb-0">Total Pagado</span>
+                        <span class="fw-bold h5 mb-0">{{ $order->payment_status === 'paid' ? 'Total pagado' : 'Total a pagar' }}</span>
                         <span class="fw-bold text-dark h5 mb-0">S/ {{ number_format($order->total_amount, 2) }}</span>
                     </div>
                 </div>

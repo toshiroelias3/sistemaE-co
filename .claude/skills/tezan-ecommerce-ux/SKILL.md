@@ -52,7 +52,7 @@ Use these as the bar when building or reviewing a page. Fix gaps in priority ord
 5. Confirmation page shows the reference number, items, shipping and total, plus "Ver mis pedidos" for logged-in users.
 
 **Trust**
-- Real contact (soporte@tezan.com), clear shipping and payment, consistent prices everywhere. Dead links (`href="#"`) erode trust — remove them rather than leave placeholders.
+- Real contact (`config('tienda.email')`), clear shipping and payment, consistent prices everywhere. Dead links (`href="#"`) erode trust — remove them rather than leave placeholders.
 
 ## Mobile first
 

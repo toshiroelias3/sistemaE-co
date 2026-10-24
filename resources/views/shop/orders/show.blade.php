@@ -16,9 +16,13 @@
                 <a href="{{ route('customer.orders.index') }}" class="btn btn-sm btn-outline-secondary px-3">Volver</a>
             </div>
 
+            @if($order->payment_status !== 'paid' && $order->status !== 'cancelled')
+                @include('shop.partials.yape-instructions', ['order' => $order])
+            @endif
+
             <!-- Línea de seguimiento -->
             @php
-                $steps = ['processing' => 'Procesando', 'shipped' => 'En ruta', 'completed' => 'Entregado'];
+                $steps = ['pending' => 'Pago por validar', 'processing' => 'Procesando', 'shipped' => 'En ruta', 'completed' => 'Entregado'];
                 $currentStep = array_search($order->status, array_keys($steps));
             @endphp
             @if($order->status === 'cancelled')

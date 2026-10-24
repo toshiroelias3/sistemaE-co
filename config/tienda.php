@@ -13,9 +13,13 @@ return [
     'razon_social' => env('TIENDA_RAZON_SOCIAL', 'TEZAN S.A.C.'),
     'ruc' => env('TIENDA_RUC'),
     'direccion' => env('TIENDA_DIRECCION'),
-    'email' => env('TIENDA_EMAIL', 'soporte@tezan.com'),
+    'email' => env('TIENDA_EMAIL', 'tezancompany@gmail.com'),
 
-    // Número con código de país, solo dígitos (ej. 51942817550)
+    // Yape: número al que el cliente paga y titular que verá en su app
+    'yape' => env('TIENDA_YAPE'),
+    'yape_titular' => env('TIENDA_YAPE_TITULAR', 'TEZAN S.A.C.'),
+
+    // WhatsApp: número con código de país, solo dígitos (ej. 51942817550)
     'whatsapp' => env('TIENDA_WHATSAPP'),
 
     'redes' => [

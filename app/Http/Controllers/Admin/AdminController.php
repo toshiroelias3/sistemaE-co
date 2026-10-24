@@ -32,7 +32,13 @@ class AdminController extends Controller
             ->take(8)
             ->get();
 
+        // Pedidos esperando que se valide el Yape, y aviso de seguridad si la clave sigue siendo la de ejemplo
+        $pendingPayments = Order::where('payment_status', 'unpaid')->where('status', '!=', 'cancelled')->count();
+        $usesDefaultPassword = \Illuminate\Support\Facades\Hash::check('admin1234', auth()->user()->password);
+
         return view('admin.dashboard', compact(
+            'pendingPayments',
+            'usesDefaultPassword',
             'totalProducts',
             'totalClients',
             'totalOrders',

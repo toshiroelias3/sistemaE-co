@@ -154,8 +154,8 @@
             </div>
             <div class="col">
                 <i class="bi bi-credit-card d-block mb-2"></i>
-                <p class="tz-label mb-1">Paga como prefieras</p>
-                <p class="small text-muted mb-0">Tarjeta de crédito, débito o Yape.</p>
+                <p class="tz-label mb-1">Paga con Yape</p>
+                <p class="small text-muted mb-0">Yapea al confirmar tu pedido y envíanos la captura.</p>
             </div>
             <div class="col">
                 <i class="bi bi-geo-alt d-block mb-2"></i>

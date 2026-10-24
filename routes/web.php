@@ -34,6 +34,8 @@ Route::get('/libro-de-reclamaciones/constancia/{token}', [ComplaintController::c
 // Páginas de ayuda
 Route::view('/preguntas-frecuentes', 'shop.pages.faq')->name('pages.faq');
 Route::view('/envios-y-pagos', 'shop.pages.shipping')->name('pages.shipping');
+Route::view('/terminos-y-condiciones', 'shop.pages.terms')->name('pages.terms');
+Route::view('/politica-de-privacidad', 'shop.pages.privacy')->name('pages.privacy');
 
 // SEO: mapa del sitio y reglas para buscadores
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
@@ -64,6 +66,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+
+    // Recuperación de contraseña
+    Route::get('/olvide-mi-contrasena', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/olvide-mi-contrasena', [AuthController::class, 'sendResetLink'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/restablecer-contrasena/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/restablecer-contrasena', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1')->name('password.update');
 });
 
 

@@ -39,7 +39,7 @@
                         <input type="checkbox" class="form-check-input" id="remember" name="remember">
                         <label class="form-check-label text-muted" for="remember">Recordarme</label>
                     </div>
-
+                    <a href="{{ route('password.request') }}" class="link-dark">¿Olvidaste tu contraseña?</a>
                 </div>
 
                 <button type="submit" class="btn btn-dark w-100 py-2 small fw-bold">Iniciar sesión</button>

@@ -9,6 +9,11 @@ use App\Models\Product;
 use App\Models\Size;
 use App\Models\User;
 use App\Mail\ComplaintRegistered;
+use App\Mail\OrderPlaced;
+use App\Mail\PaymentConfirmed;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use App\Models\Complaint;
 use App\Support\ProductImages;
 use Illuminate\Support\Facades\Mail;
@@ -67,7 +72,7 @@ class StoreFlowTest extends TestCase
             'shipping_address' => 'Av. Siempre Viva 123',
             'city'             => 'Lima',
             'phone'            => '987654321',
-            'payment_method'   => 'card',
+            'payment_method'   => 'yape',
             'terms'            => '1',
         ])->assertRedirect();
 
@@ -354,6 +359,63 @@ class StoreFlowTest extends TestCase
             'base_price'  => 40,
             'variants'    => [['size_id' => Size::first()->id, 'color_id' => Color::first()->id, 'stock' => 1]],
         ])->assertSessionHasErrors('gender');
+    }
+
+    public function test_yape_orders_start_unpaid_email_instructions_and_confirm_by_admin(): void
+    {
+        Mail::fake();
+        config(['tienda.yape' => '942817550']);
+
+        $this->addToCart(1);
+        $order = $this->checkout();
+
+        $this->assertSame('pending', $order->status);
+        $this->assertSame('unpaid', $order->payment_status);
+        Mail::assertSent(OrderPlaced::class, fn ($mail) => $mail->hasTo('ana@example.com'));
+
+        $this->get(route('checkout.success', $order->reference_number))
+            ->assertSee('942 817 550')
+            ->assertSee('S/ 132.00');
+
+        // Las tarjetas ya no se aceptan
+        $this->addToCart(1);
+        $this->post(route('checkout.store'), ['payment_method' => 'card'])->assertSessionHasErrors('payment_method');
+
+        // El admin valida el Yape y el cliente recibe la confirmación
+        $this->actingAs($this->admin())
+            ->put(route('admin.orders.update', $order->id), ['status' => 'processing', 'payment_status' => 'paid'])
+            ->assertRedirect();
+        Mail::assertSent(PaymentConfirmed::class, fn ($mail) => $mail->hasTo('ana@example.com'));
+    }
+
+    public function test_customers_can_reset_a_forgotten_password(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create(['email' => 'cliente@example.com']);
+
+        $this->post(route('password.email'), ['email' => 'cliente@example.com'])->assertSessionHas('success');
+
+        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+            $this->post(route('password.update'), [
+                'token' => $notification->token,
+                'email' => $user->email,
+                'password' => 'nueva-clave-123',
+                'password_confirmation' => 'nueva-clave-123',
+            ])->assertRedirect(route('login'));
+
+            return Hash::check('nueva-clave-123', $user->fresh()->password);
+        });
+    }
+
+    public function test_validation_messages_and_legal_pages_are_in_spanish(): void
+    {
+        $this->addToCart(1);
+        $this->post(route('checkout.store'), [])->assertSessionHasErrors();
+        $this->assertStringContainsString('obligatorio', session('errors')->first('customer_email'));
+
+        $this->get(route('pages.terms'))->assertOk()->assertSee('Términos y condiciones')->assertSee('Yape');
+        $this->get(route('pages.privacy'))->assertOk()->assertSee('29733');
+        $this->get(route('checkout.index'))->assertSee(route('pages.terms'), false);
     }
 
     public function test_clients_cannot_open_the_admin_panel(): void

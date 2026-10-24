@@ -81,80 +81,32 @@
                     </div>
                 </div>
 
-                <!-- Sección 3: Métodos de Pago -->
-                <h5 class="fw-bold mb-3 border-bottom pb-2 pt-2">3. Pago</h5>
-                <p class="text-muted small mb-3">Todas las transacciones son seguras y están encriptadas.</p>
+                <!-- Sección 3: Pago con Yape -->
+                <h5 class="fw-bold mb-3 border-bottom pb-2 pt-2">3. Pago con Yape</h5>
+                <input type="hidden" name="payment_method" value="yape">
 
-                <div class="mb-4">
-                    <!-- Opción 1: Tarjeta de Crédito y Débito -->
-                    <div class="border p-3 mb-2 bg-white">
-                        <div class="form-check d-flex align-items-center justify-content-between">
-                            <div>
-                                <input class="form-check-input me-2" type="radio" name="payment_method" id="pay_card" value="card" {{ old('payment_method', 'card') === 'card' ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold small" for="pay_card">
-                                    Tarjeta de crédito y débito
-                                </label>
-                            </div>
-                            <div class="d-flex gap-2 fs-5 text-muted">
-                                <i class="bi bi-credit-card" title="Tarjeta de crédito / débito"></i>
-                            </div>
-                        </div>
-
-                        <!-- Formulario de Tarjeta -->
-                        <div id="card-fields" class="mt-3 pt-3 border-top">
-                            <div class="mb-3">
-                                <label class="form-label small text-muted fw-semibold mb-1">Número de tarjeta *</label>
-                                <input type="text" class="form-control border-dark-subtle" placeholder="1234 1234 1234 1234" maxlength="19">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small text-muted fw-semibold mb-1">Nombre del titular *</label>
-                                <input type="text" class="form-control border-dark-subtle" placeholder="Ej.: María López">
-                                <div class="form-text text-xs text-muted" style="font-size: 0.75rem;">Complétalo como aparece en la tarjeta.</div>
-                            </div>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <label class="form-label small text-muted fw-semibold mb-1">Vencimiento *</label>
-                                    <input type="text" class="form-control border-dark-subtle" placeholder="MM/AA" maxlength="5">
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label small text-muted fw-semibold mb-1">Código de seguridad *</label>
-                                    <input type="text" class="form-control border-dark-subtle" placeholder="Ej.: 123" maxlength="4">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Opción 2: Yape / Plin -->
-                    <div class="border p-3 bg-white">
-                        <div class="form-check d-flex align-items-center justify-content-between">
-                            <div>
-                                <input class="form-check-input me-2" type="radio" name="payment_method" id="pay_yape" value="yape" {{ old('payment_method') === 'yape' ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold small" for="pay_yape">
-                                    Yape / Plin / Transferencia
-                                </label>
-                            </div>
-                            <span class="badge text-white px-2 py-1" style="background-color: #742284; font-size: 0.7rem;">Yape</span>
-                        </div>
-
-                        <!-- Panel Informativo de Yape -->
-                        <div id="yape-fields" class="mt-3 pt-3 border-top text-center bg-light p-3 d-none">
-                            <p class="small mb-2 text-dark">Escanea el código QR o realiza el pago al número <strong>942 817 550</strong> (Titular: TEZAN S.A.C.).</p>
-                            <p class="small text-muted mb-0">Una vez realizado el pedido, podrás adjuntar tu constancia o validaremos la operación vía WhatsApp.</p>
-                        </div>
-                    </div>
+                <div class="p-3 mb-4" style="background: var(--tz-warm);">
+                    <p class="fw-semibold mb-2"><i class="bi bi-phone me-2"></i>Pagas con Yape después de confirmar tu pedido</p>
+                    <ol class="small mb-0 ps-3">
+                        <li>Confirma tu pedido con el botón de abajo.</li>
+                        <li>Te mostramos el monto exacto y el número de Yape{{ config('tienda.yape') ? ' (' . config('tienda.yape') . ')' : '' }} a nombre de {{ config('tienda.yape_titular') }}.</li>
+                        <li>Yapea y envíanos la captura por WhatsApp con tu número de pedido.</li>
+                        <li>Validamos el pago y preparamos tu envío.</li>
+                    </ol>
                 </div>
 
-                <!-- Términos y Condiciones -->
+                <!-- Términos y Política de privacidad -->
                 <div class="form-check mb-4">
-                    <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                    <input class="form-check-input" type="checkbox" id="terms" name="terms" value="1" required>
                     <label class="form-check-label small text-muted" for="terms">
-                        He leído y estoy de acuerdo con los <a href="#" class="text-dark text-decoration-underline">términos y condiciones</a> de la web *
+                        Acepto los <a href="{{ route('pages.terms') }}" target="_blank" class="text-dark text-decoration-underline">términos y condiciones</a>
+                        y la <a href="{{ route('pages.privacy') }}" target="_blank" class="text-dark text-decoration-underline">política de privacidad</a> *
                     </label>
                 </div>
 
                 <!-- Botón Confirmar (se deshabilita al enviar para evitar pedidos duplicados) -->
                 <button type="submit" class="btn btn-dark w-100 fw-bold py-3" onclick="setTimeout(() => this.disabled = true, 0)">
-                    <i class="bi bi-lock-fill me-2"></i> Realizar el Pedido
+                    Confirmar pedido y pagar con Yape
                 </button>
             </form>
         </div>
@@ -215,30 +167,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const payCardRadio = document.getElementById('pay_card');
-        const payYapeRadio = document.getElementById('pay_yape');
-        const cardFields = document.getElementById('card-fields');
-        const yapeFields = document.getElementById('yape-fields');
-
-        function togglePaymentFields() {
-            if (payCardRadio.checked) {
-                cardFields.classList.remove('d-none');
-                yapeFields.classList.add('d-none');
-            } else if (payYapeRadio.checked) {
-                cardFields.classList.add('d-none');
-                yapeFields.classList.remove('d-none');
-            }
-        }
-
-        if (payCardRadio && payYapeRadio) {
-            payCardRadio.addEventListener('change', togglePaymentFields);
-            payYapeRadio.addEventListener('change', togglePaymentFields);
-            togglePaymentFields();
-        }
-    });
-</script>
-@endpush

@@ -47,6 +47,10 @@
                 </div>
 
                 <button type="submit" class="btn btn-dark w-100 py-2 small fw-bold">Crear cuenta</button>
+                <p class="small text-muted mt-3 mb-0">
+                    Al crear tu cuenta aceptas los <a href="{{ route('pages.terms') }}" class="link-dark">términos y condiciones</a>
+                    y la <a href="{{ route('pages.privacy') }}" class="link-dark">política de privacidad</a>.
+                </p>
             </form>
 
             <div class="text-center mt-4 small">

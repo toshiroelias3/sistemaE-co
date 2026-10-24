@@ -30,6 +30,8 @@
                 <ul class="list-unstyled small mb-0">
                     <li class="mb-2"><a href="{{ route('pages.faq') }}">Preguntas frecuentes</a></li>
                     <li class="mb-2"><a href="{{ route('pages.shipping') }}">Envíos y pagos</a></li>
+                    <li class="mb-2"><a href="{{ route('pages.terms') }}">Términos y condiciones</a></li>
+                    <li class="mb-2"><a href="{{ route('pages.privacy') }}">Política de privacidad</a></li>
                     <li class="mb-2"><a href="mailto:{{ config('tienda.email') }}">{{ config('tienda.email') }}</a></li>
                     @if(config('tienda.whatsapp'))
                         <li class="mb-2"><a href="https://wa.me/{{ config('tienda.whatsapp') }}" target="_blank" rel="noopener">WhatsApp</a></li>
@@ -51,7 +53,7 @@
             </span>
             <span class="d-flex align-items-center gap-2" aria-label="Medios de pago">
                 <span>Pagas con</span>
-                @foreach(['Visa', 'Mastercard', 'Yape'] as $medio)
+                @foreach(['Yape'] as $medio)
                     <span class="border px-2 py-1 bg-white text-dark fw-semibold" style="font-size: 0.75rem;">{{ $medio }}</span>
                 @endforeach
             </span>
