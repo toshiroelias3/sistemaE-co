@@ -10,6 +10,7 @@ use App\Models\Color;
 use App\Models\OrderItem;
 use App\Models\ProductImage;
 use App\Http\Requests\Admin\ProductRequest;
+use App\Support\ProductImages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -141,6 +142,7 @@ class ProductController extends Controller
 
             // Los archivos se borran solo cuando la base de datos confirmó la eliminación
             Storage::disk('public')->delete($paths);
+            array_walk($paths, fn ($path) => ProductImages::deleteDerivatives($path));
 
             return redirect()->route('admin.products.index')->with('success', 'Prenda y sus archivos multimedia eliminados correctamente.');
 
@@ -159,6 +161,7 @@ class ProductController extends Controller
         $productId = $image->product_id;
 
         Storage::disk('public')->delete($image->image_path);
+        ProductImages::deleteDerivatives($image->image_path);
         $image->delete();
 
         // Si era la portada, asignar la primera foto disponible como nueva portada
@@ -252,8 +255,11 @@ class ProductController extends Controller
         $hasPrimary = $product->images()->where('is_primary', true)->exists();
 
         foreach ($request->file('images') as $index => $imageFile) {
+            $path = $imageFile->store('products', 'public');
+            ProductImages::generate($path); // Versiones WebP livianas para la tienda
+
             $product->images()->create([
-                'image_path' => $imageFile->store('products', 'public'),
+                'image_path' => $path,
                 'is_primary' => !$hasPrimary && $index === 0,
             ]);
         }

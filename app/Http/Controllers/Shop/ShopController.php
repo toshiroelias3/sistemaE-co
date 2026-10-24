@@ -88,7 +88,7 @@ class ShopController extends Controller
             $image = \App\Models\ProductImage::whereHas('product', fn ($q) => $q->where('is_active', true)->whereIn('category_id', $ids))
                 ->orderByDesc('is_primary')
                 ->latest()
-                ->value('image_path');
+                ->first();
 
             return ['category' => $category, 'image' => $image];
         })->filter(fn ($item) => $item['image']);

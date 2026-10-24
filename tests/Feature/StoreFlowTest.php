@@ -8,8 +8,11 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Size;
 use App\Models\User;
+use App\Support\ProductImages;
 use Database\Seeders\InitialStoreSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StoreFlowTest extends TestCase
@@ -165,6 +168,73 @@ class StoreFlowTest extends TestCase
             $this->get(route($route))->assertOk();
         }
         $this->get(route('admin.products.edit', $this->product))->assertOk();
+    }
+
+    public function test_product_page_has_share_preview_and_structured_data(): void
+    {
+        $this->get(route('shop.product', 'polo-basico'))
+            ->assertOk()
+            ->assertSee('<meta property="og:title" content="Polo Básico | TEZAN">', false)
+            ->assertSee('<meta property="og:type" content="product">', false)
+            ->assertSee('<link rel="canonical" href="' . route('shop.product', 'polo-basico') . '">', false)
+            ->assertSee('application/ld+json', false)
+            ->assertSee('"priceCurrency":"PEN"', false)
+            ->assertSee('"price":"120.00"', false)
+            ->assertSee('https://schema.org/InStock', false);
+    }
+
+    public function test_private_pages_and_searches_are_not_indexed(): void
+    {
+        $this->get(route('cart.index'))->assertSee('<meta name="robots" content="noindex, follow">', false);
+        $this->get(route('login'))->assertSee('<meta name="robots" content="noindex, follow">', false);
+        $this->get(route('home', ['q' => 'polo']))->assertSee('<meta name="robots" content="noindex, follow">', false);
+        $this->get(route('home'))->assertDontSee('noindex', false);
+    }
+
+    public function test_sitemap_lists_active_products_and_robots_points_to_it(): void
+    {
+        Product::create([
+            'category_id' => $this->product->category_id,
+            'name' => 'Oculto',
+            'slug' => 'oculto',
+            'base_price' => 10,
+            'is_active' => false,
+        ]);
+
+        $this->get(route('seo.sitemap'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
+            ->assertSee(route('shop.product', 'polo-basico'), false)
+            ->assertDontSee(route('shop.product', 'oculto'), false);
+
+        $this->get(route('seo.robots'))
+            ->assertOk()
+            ->assertSee('Disallow: /checkout')
+            ->assertSee('Sitemap: ' . route('seo.sitemap'));
+    }
+
+    public function test_uploaded_photos_get_light_webp_versions_that_are_cleaned_up(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs($this->admin())->put(route('admin.products.update', $this->product), [
+            'name'        => 'Polo Básico',
+            'category_id' => $this->product->category_id,
+            'base_price'  => 120,
+            'is_active'   => 1,
+            'variants'    => [['size_id' => Size::first()->id, 'color_id' => Color::first()->id, 'stock' => 5]],
+            'images'      => [UploadedFile::fake()->image('polo.jpg', 1600, 2000)],
+        ])->assertRedirect(route('admin.products.index'));
+
+        $image = $this->product->images()->firstOrFail();
+        foreach ([400, 800, 1200] as $width) {
+            Storage::disk('public')->assertExists(ProductImages::derivativePath($image->image_path, $width));
+        }
+        $this->assertStringContainsString('-800.webp 800w', $image->srcset());
+
+        $this->actingAs($this->admin())->delete(route('admin.products.images.destroy', $image));
+        Storage::disk('public')->assertMissing($image->image_path);
+        Storage::disk('public')->assertMissing(ProductImages::derivativePath($image->image_path, 400));
     }
 
     public function test_clients_cannot_open_the_admin_panel(): void

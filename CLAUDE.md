@@ -15,6 +15,7 @@ npm run dev / npm run build    # Vite only
 php artisan migrate
 php artisan db:seed --class=InitialStoreSeeder   # admin user (admin@tezan.com / admin1234) + catalog base data
 php artisan storage:link       # required for product images (public/storage -> storage/app/public)
+php artisan images:optimize    # generate 400/800/1200px WebP versions for existing product photos (--force to redo)
 
 composer test                  # clears config cache, then php artisan test
 php artisan test --filter=SomeTest               # single test class/method
@@ -32,7 +33,9 @@ vendor/bin/pint                # code style (Laravel Pint)
 
 **Controllers** are namespaced by area: `Admin/` (dashboard, categories, products, colors, orders), `Shop/` (catalog, cart, checkout, customer orders), `Auth/` (hand-rolled login/register — no Breeze/Fortify). Admin form validation uses FormRequests in `app/Http/Requests/Admin/`.
 
-**Catalog model** — `Product` has many `ProductVariant`s; a variant is the unique (product, `Size`, `Color`) combination and holds `sku` and `stock`. Price lives on the product (`base_price`), not the variant. `Category` is self-referencing via `parent_id` (parent/children). `ProductImage` rows store paths on the `public` disk (`products/...`) with one `is_primary` flag; render with `asset('storage/'.$path)`. Colors can be created inline from the product form via an AJAX endpoint.
+**Catalog model** — `Product` has many `ProductVariant`s; a variant is the unique (product, `Size`, `Color`) combination and holds `sku` and `stock`. Price lives on the product (`base_price`), not the variant. `Category` is self-referencing via `parent_id` (parent/children). `ProductImage` rows store paths on the `public` disk (`products/...`) with one `is_primary` flag; render with `asset('storage/'.$path)`. Colors can be created inline from the product form via an AJAX endpoint. Uploads also get WebP derivatives (`App\Support\ProductImages`, needs PHP GD — enabled in the local XAMPP php.ini); render photos with `$image->url($width)` / `$image->srcset()`, which fall back to the original when no derivatives exist.
+
+**SEO** — the shop layout emits canonical, Open Graph and `@stack('head')`; private pages set `@section('noindex', '1')`. The product page adds Product/BreadcrumbList JSON-LD. `/sitemap.xml` and `/robots.txt` are dynamic routes (`Shop\SeoController`); there is no static `public/robots.txt`.
 
 **Cart** — session-only (`session('cart')`), read through `App\Support\Cart` (items/count/subtotal and the shipping rule: S/ 12, free from S/ 200). Keyed by `"{product_id}-{size_id}-{color_id}"`. Each entry snapshots name, price, size/color names, image URL, and `max_stock`. Cart add/remove endpoints serve both normal form posts (redirect) and AJAX (JSON with `cart_count` and re-rendered `shop.partials.mini-cart-items` HTML) — keep both paths working when changing them.
 

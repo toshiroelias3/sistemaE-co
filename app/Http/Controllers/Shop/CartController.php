@@ -53,7 +53,7 @@ class CartController extends Controller
         $primaryImage = $variant->product->images->where('is_primary', true)->first()
                         ?? $variant->product->images->first();
 
-        $imagePath = $primaryImage ? asset('storage/' . $primaryImage->image_path) : null;
+        $imagePath = $primaryImage?->url(400);
 
         // 4. Actualizar cantidad o registrar nuevo ítem
         if (isset($cart[$cartKey])) {

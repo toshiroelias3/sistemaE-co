@@ -10,6 +10,7 @@ use App\Http\Controllers\Shop\ShopController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
 use App\Http\Controllers\Shop\CustomerOrderController;
+use App\Http\Controllers\Shop\SeoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +23,10 @@ use App\Http\Controllers\Shop\CustomerOrderController;
 // ==========================================
 Route::get('/', [ShopController::class, 'index'])->name('home');
 Route::get('/producto/{slug}', [ShopController::class, 'show'])->name('shop.product');
+
+// SEO: mapa del sitio y reglas para buscadores
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
 
 // Carrito de Compras
 Route::prefix('carrito')->name('cart.')->group(function () {

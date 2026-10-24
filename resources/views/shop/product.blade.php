@@ -1,7 +1,50 @@
 @extends('layouts.app')
 
 @section('title', $product->name)
-@section('meta_description', Str::limit($product->description ?? 'Prenda TEZAN hecha en Perú.', 155))
+@section('meta_description', Str::limit($product->description ?? "{$product->name} de TEZAN, hecho en Perú. S/ " . number_format($product->base_price, 2) . ', despacho a todo el Perú.', 155))
+@section('canonical', route('shop.product', $product->slug))
+@section('og_type', 'product')
+@if($product->images->isNotEmpty())
+    @section('og_image', asset('storage/' . $product->images->first()->image_path))
+@endif
+
+@push('head')
+    @php
+        $productUrl = route('shop.product', $product->slug);
+        $inStock = $product->variants->sum('stock') > 0;
+        $structuredData = [
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'Product',
+                'name' => $product->name,
+                'description' => $product->description ?? "{$product->name} de TEZAN, hecho en Perú.",
+                'image' => $product->images->map(fn ($img) => asset('storage/' . $img->image_path))->values(),
+                'sku' => 'TZN-' . $product->id,
+                'brand' => ['@type' => 'Brand', 'name' => 'TEZAN'],
+                'offers' => [
+                    '@type' => 'Offer',
+                    'url' => $productUrl,
+                    'priceCurrency' => 'PEN',
+                    'price' => number_format($product->base_price, 2, '.', ''),
+                    'availability' => $inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                    'itemCondition' => 'https://schema.org/NewCondition',
+                ],
+            ],
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => array_values(array_filter([
+                    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Inicio', 'item' => route('home')],
+                    $product->category ? ['@type' => 'ListItem', 'position' => 2, 'name' => $product->category->name, 'item' => route('home', ['category' => $product->category->id])] : null,
+                    ['@type' => 'ListItem', 'position' => $product->category ? 3 : 2, 'name' => $product->name, 'item' => $productUrl],
+                ])),
+            ],
+        ];
+    @endphp
+    <meta property="product:price:amount" content="{{ number_format($product->base_price, 2, '.', '') }}">
+    <meta property="product:price:currency" content="PEN">
+    <script type="application/ld+json">@json($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)</script>
+@endpush
 
 @section('full')
 @php
@@ -15,7 +58,12 @@
             <div class="tz-gallery" aria-label="Fotos de {{ $product->name }}">
                 @forelse($product->images as $index => $img)
                     <figure>
-                        <img src="{{ asset('storage/' . $img->image_path) }}" alt="{{ $index === 0 ? $product->name : '' }}" {{ $index > 1 ? 'loading=lazy' : '' }}>
+                        <img src="{{ $img->url(1200) }}"
+                             srcset="{{ $img->srcset() }}"
+                             sizes="(min-width: 1200px) 33vw, (min-width: 992px) 29vw, 100vw"
+                             alt="{{ $index === 0 ? $product->name : '' }}"
+                             decoding="async"
+                             {!! $index === 0 ? 'fetchpriority="high"' : 'loading="lazy"' !!}>
                     </figure>
                 @empty
                     <figure class="d-flex align-items-center justify-content-center text-muted">Foto próximamente</figure>

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('noindex', '1')
+
 @section('title', 'Pedido ' . $order->reference_number)
 
 @section('content')

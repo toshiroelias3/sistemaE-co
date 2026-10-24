@@ -1,12 +1,26 @@
 @extends('layouts.app')
 
 @section('title', 'Básicos de algodón hechos en Perú')
+@section('og_image', 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop')
+
+{{-- SEO: el orden no crea páginas nuevas; la categoría y la página sí. Las búsquedas no se indexan. --}}
+@if(request()->filled('q'))
+    @section('noindex', '1')
+@else
+    @section('canonical', route('home', array_filter([
+        'category' => request('category'),
+        'page' => request('page') > 1 ? request('page') : null,
+    ])))
+@endif
 
 @section('full')
 <!-- Banner de campaña -->
 <section class="tz-hero" aria-labelledby="hero-title">
     {{-- Foto de campaña de stock (Unsplash, photo-1490481651871). Reemplazar por una sesión propia de TEZAN. --}}
-    <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop"
+    @php $hero = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=75&auto=format&fit=crop&w='; @endphp
+    <img src="{{ $hero }}1600"
+         srcset="{{ $hero }}640 640w, {{ $hero }}1024 1024w, {{ $hero }}1600 1600w, {{ $hero }}2200 2200w"
+         sizes="100vw"
          alt="Prendas de la colección TEZAN colgadas en un perchero" fetchpriority="high">
     <div class="tz-hero-text">
         <h1 id="hero-title">Básicos hechos en Perú</h1>
@@ -103,7 +117,7 @@
     <section class="tz-editorial px-0" aria-label="Categorías destacadas">
         @foreach($editorial as $item)
             <a href="{{ route('home', ['category' => $item['category']->id]) }}#catalogo">
-                <img src="{{ asset('storage/' . $item['image']) }}" alt="" loading="lazy">
+                <img src="{{ $item['image']->url(1200) }}" srcset="{{ $item['image']->srcset() }}" sizes="(min-width: 768px) 50vw, 100vw" alt="" loading="lazy" decoding="async">
                 <span>
                     <span class="d-block tz-display fs-2">{{ $item['category']->name }}</span>
                     <span class="d-block tz-label mt-1">Comprar ahora</span>
@@ -137,23 +151,3 @@
 </section>
 @endsection
 
-@push('scripts')
-<script>
-    // Al pasar el cursor por una prenda se recorren sus fotos
-    document.querySelectorAll('.product-image-container').forEach(container => {
-        const images = container.querySelectorAll('.hover-slide-img');
-        if (images.length <= 1) return;
-
-        const show = idx => images.forEach((img, i) => {
-            img.classList.toggle('opacity-100', i === idx);
-            img.classList.toggle('opacity-0', i !== idx);
-        });
-
-        container.addEventListener('mousemove', e => {
-            const rect = container.getBoundingClientRect();
-            show(Math.min(images.length - 1, Math.max(0, Math.floor((e.clientX - rect.left) / rect.width * images.length))));
-        });
-        container.addEventListener('mouseleave', () => show(0));
-    });
-</script>
-@endpush

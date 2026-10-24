@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('noindex', '1')
+
 @section('title', '¡Gracias por tu compra!')
 
 @section('content')
