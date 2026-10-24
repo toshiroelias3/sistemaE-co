@@ -89,15 +89,23 @@ class StoreFlowTest extends TestCase
 
     public function test_checkout_uses_free_shipping_and_current_price(): void
     {
-        $this->addToCart(2);
+        $this->addToCart(3);
 
         // Si el precio cambia después de agregar al carrito, se cobra el precio vigente
         $this->product->update(['base_price' => 110]);
 
         $order = $this->checkout();
 
-        $this->assertEquals(220, $order->total_amount); // 2 x 110, envío gratis (>= 200)
-        $this->assertEquals(3, $this->product->variants()->first()->stock);
+        $this->assertEquals(330, $order->total_amount); // 3 x 110, envío gratis (>= 250)
+        $this->assertEquals(2, $this->product->variants()->first()->stock);
+    }
+
+    public function test_orders_below_250_pay_shipping(): void
+    {
+        $this->addToCart(2);
+        $this->product->update(['base_price' => 110]);
+
+        $this->assertEquals(232, $this->checkout()->total_amount); // 2 x 110 + 12 de envío
     }
 
     public function test_small_orders_pay_shipping(): void
@@ -291,10 +299,11 @@ class StoreFlowTest extends TestCase
 
     public function test_help_pages_render_and_whatsapp_shows_only_when_configured(): void
     {
-        $this->get(route('pages.faq'))->assertOk()->assertSee('FAQPage', false)->assertSee('S/ 200');
+        $this->get(route('pages.faq'))->assertOk()->assertSee('FAQPage', false)->assertSee('S/ 250');
         $this->get(route('pages.shipping'))->assertOk();
         $this->get(route('complaints.create'))->assertOk();
 
+        config(['tienda.whatsapp' => null]);
         $this->get(route('home'))->assertSee('Libro de Reclamaciones')->assertDontSee('wa.me', false);
 
         config(['tienda.whatsapp' => '51900000000']);

@@ -8,7 +8,7 @@ namespace App\Support;
 class Cart
 {
     public const SHIPPING_COST = 12.00;
-    public const FREE_SHIPPING_FROM = 200.00;
+    public const FREE_SHIPPING_FROM = 250.00;
 
     public static function items(): array
     {

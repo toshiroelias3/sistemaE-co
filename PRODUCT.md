@@ -16,7 +16,7 @@ TEZAN es una tienda online de ropa (polos y básicos) con catálogo, carrito, ch
 Prendas hechas en Perú, con telas de calidad y buen fit, a precio accesible, dentro de una estética "old money" atemporal. La combinación de confección local + calidad de tela + precio es lo que una marca importada o de fast fashion no puede afirmar con verdad.
 
 ## Operating Context
-- Moneda: soles (S/). Envío S/ 12, gratis desde S/ 200, despachos a todo el Perú.
+- Moneda: soles (S/). Envío S/ 12, gratis desde S/ 250 (desde el 2026-10-24; antes S/ 200), despachos a todo el Perú.
 - Pago: tarjeta de crédito/débito o Yape/Plin (el pago está simulado en el código actual).
 - Cada prenda tiene variantes por talla (S, M, L, XL) y color, con stock por variante.
 - Catálogo con categorías y subcategorías (p. ej. Polos, Colecciones).

@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('partials.navbar', function ($view) {
             $view->with('navCategories', Category::where('is_active', true)
                 ->whereNull('parent_id')
+                ->with(['children' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
                 ->orderBy('name')
                 ->get());
         });

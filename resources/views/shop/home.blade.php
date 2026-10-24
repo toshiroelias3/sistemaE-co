@@ -34,15 +34,7 @@
     </div>
 </section>
 
-<!-- Categorías -->
-<nav class="tz-tabs tz-label" aria-label="Categorías">
-    <a href="{{ route('home') }}#catalogo" class="{{ !request('category') && !request('q') ? 'active' : '' }}">Todo</a>
-    <a href="{{ route('home', ['sort' => 'newest']) }}#catalogo" class="{{ request('sort') === 'newest' && !request('category') ? 'active' : '' }}">Novedades</a>
-    @foreach($categories as $cat)
-        @php $isOpen = request('category') == $cat->id || $cat->children->pluck('id')->contains(request('category')); @endphp
-        <a href="{{ route('home', ['category' => $cat->id]) }}#catalogo" class="{{ $isOpen ? 'active' : '' }}">{{ $cat->name }}</a>
-    @endforeach
-</nav>
+<div class="pt-4 pt-lg-5"></div>
 
 <!-- Filas por categoría -->
 @foreach($rows as $row)

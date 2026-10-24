@@ -14,7 +14,7 @@ Read `PRODUCT.md` (product truth) and `DESIGN.md` (visual system, Zara-style e-c
 These come from the code and PRODUCT.md. Never contradict them in copy and never invent new ones (no return policy, delivery times, discounts, reviews or "best seller" claims until the owner defines them).
 
 - Currency is soles, written `S/ 35.00` (`number_format($x, 2)`).
-- Shipping: S/ 12, free from S/ 200 — always read `App\Support\Cart::SHIPPING_COST` / `FREE_SHIPPING_FROM`, never hardcode.
+- Shipping: S/ 12, free from S/ 250 — always read `App\Support\Cart::SHIPPING_COST` / `FREE_SHIPPING_FROM`, never hardcode.
 - Payment: card or Yape (simulated today). Despacho a todo el Perú. Hecho en Perú.
 - Vocabulary: it's **"bolsa"**, never "carrito" in UI copy; the add button is **"Añadir a la bolsa"**. Keep one name per action across the whole flow — the button, the toast and the page title must match.
 - UI copy is Spanish (Peru), sentence case for text; small uppercase labels (`tz-label`) only for navigation, buttons and section labels.

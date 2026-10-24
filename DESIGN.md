@@ -101,8 +101,8 @@ Esta dirección reemplazó a «Damero limeño», descartada por el usuario por v
 
 ## Layout
 
-- La cabecera es una rejilla de tres columnas: categorías a la izquierda, logo centrado y Buscar, Cuenta y Bolsa (n) a la derecha. En celular, menú lateral y bolsa.
-- Portada: banner de campaña (82vh, máximo 820px) con el texto abajo a la izquierda sobre un degradado oscuro de legibilidad; pestañas de categorías; grilla; banners de categoría (solo si hay dos con foto); franja de beneficios.
+- Cabecera estilo Rome (pedido del usuario): barra de anuncio en mayúsculas; logo a la izquierda; menú «Ver todo», «Novedades» y categorías con submenús que abren al pasar el cursor o con el teclado; íconos de buscar, cuenta y bolsa con contador a la derecha. En la portada flota transparente sobre el banner (con un velo oscuro arriba para que se lea) y se vuelve blanca y fija al bajar. En celular: logo, buscar, bolsa y menú lateral.
+- Portada: banner de campaña (82vh, máximo 820px) con el texto abajo a la izquierda; filas deslizables (Novedades y por categoría); grilla «Toda la colección»; banners de categoría (solo si hay dos con foto); franja de beneficios.
 - Grilla de productos: 2 columnas en celular y 4 desde 992px, fotos 3:4, 4px de separación horizontal y 2rem vertical.
 - Ficha de producto: fotos en dos columnas en escritorio (deslizables en celular) y un panel de compra fijo al hacer scroll.
 
