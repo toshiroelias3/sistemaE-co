@@ -25,6 +25,20 @@ class ProductRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        // La tabla de stock llega como stock[color_id][size_id]; cada celda con valor es una variante.
+        // Una celda vacía significa que esa combinación no se vende.
+        if ($this->has('stock')) {
+            $variants = [];
+            foreach ((array) $this->input('stock') as $colorId => $sizes) {
+                foreach ((array) $sizes as $sizeId => $stock) {
+                    if ($stock !== null && $stock !== '') {
+                        $variants[] = ['color_id' => $colorId, 'size_id' => $sizeId, 'stock' => $stock];
+                    }
+                }
+            }
+            $this->merge(['variants' => $variants]);
+        }
+
         $this->merge([
             'slug'        => Str::slug((string) $this->name),
             'is_active'   => $this->boolean('is_active'),
@@ -94,7 +108,9 @@ class ProductRequest extends FormRequest
             'slug.unique'          => 'Ya existe otra prenda con un nombre equivalente. Usa un nombre distinto.',
             'category_id.required' => 'Debes seleccionar una categoría.',
             'base_price.required'  => 'El precio base es obligatorio.',
-            'variants.required'    => 'Debes agregar al menos una variante de talla y color.',
+            'variants.required'    => 'Ingresa el stock de al menos una talla en algún color.',
+            'variants.min'         => 'Ingresa el stock de al menos una talla en algún color.',
+            'variants.*.stock.min' => 'El stock no puede ser negativo.',
             'images.*.image'       => 'El archivo adjunto debe ser una imagen válida (JPG, PNG, WEBP).',
             'images.*.mimes'       => 'Las imágenes deben estar en formato JPEG, PNG, JPG o WEBP.',
             'images.*.max'         => 'Las imágenes no deben pesar más de 10 MB.',

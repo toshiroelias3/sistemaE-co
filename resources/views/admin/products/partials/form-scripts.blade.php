@@ -43,32 +43,62 @@
             });
         }
 
-        // 2. Lógica de la Matriz Dinámica de Inventario
-        const container = document.getElementById('variants-container');
-        const addBtn = document.getElementById('add-variant-btn');
-        const template = document.getElementById('variant-row-template');
-        let variantIndex = container ? container.querySelectorAll('.variant-row').length : 0;
+        // 2. Tabla de stock (color × talla)
+        const matrixBody = document.getElementById('matrix-body');
+        const rowTemplate = document.getElementById('matrix-row-template');
+        const addColorSelect = document.getElementById('add-color-select');
+        const quickFill = document.getElementById('quick-fill-value');
 
-        if (addBtn && container && template) {
-            addBtn.addEventListener('click', function() {
-                const html = template.innerHTML.replace(/__INDEX__/g, variantIndex++);
-                container.insertAdjacentHTML('beforeend', html);
-            });
+        function refreshTotals() {
+            const cells = [...matrixBody.querySelectorAll('.stock-cell')].filter(c => c.value !== '');
+            document.getElementById('matrix-total').textContent = cells.reduce((sum, c) => sum + (parseInt(c.value) || 0), 0);
+            document.getElementById('matrix-combos').textContent = cells.length;
+            document.getElementById('matrix-empty').hidden = matrixBody.children.length > 0;
         }
 
-        if (container) {
-            container.addEventListener('click', function(e) {
-                if (!e.target.closest('.remove-row-btn')) return;
+        function addColorRow(id, name, hex) {
+            if (matrixBody.querySelector(`tr[data-color-id="${id}"]`)) return;
+            matrixBody.insertAdjacentHTML('beforeend', rowTemplate.innerHTML.replace(/__COLOR_ID__/g, id));
+            const row = matrixBody.lastElementChild;
+            row.querySelector('.color-name').textContent = name;      // textContent: el nombre nunca se interpreta como HTML
+            row.querySelector('.color-swatch').style.background = hex || 'transparent';
+            const option = addColorSelect.querySelector(`option[value="${id}"]`);
+            if (option) option.disabled = true;
+            addColorSelect.value = '';
+            row.querySelector('.stock-cell').focus();
+            refreshTotals();
+        }
 
-                if (container.querySelectorAll('.variant-row').length > 1) {
-                    e.target.closest('.variant-row').remove();
-                } else {
-                    alert('El producto debe mantener al menos una variante activa de inventario.');
+        if (matrixBody) {
+            document.getElementById('add-color-btn').addEventListener('click', () => {
+                const option = addColorSelect.selectedOptions[0];
+                if (option && option.value) addColorRow(option.value, option.textContent.trim(), option.dataset.hex);
+            });
+
+            const fillEmpty = cells => cells.forEach(c => { if (c.value === '') c.value = quickFill.value || 0; });
+
+            document.getElementById('fill-all-btn').addEventListener('click', () => {
+                fillEmpty(matrixBody.querySelectorAll('.stock-cell'));
+                refreshTotals();
+            });
+
+            matrixBody.addEventListener('click', e => {
+                const row = e.target.closest('tr');
+                if (e.target.closest('.fill-row-btn')) {
+                    fillEmpty(row.querySelectorAll('.stock-cell'));
+                } else if (e.target.closest('.remove-color-btn')) {
+                    const option = addColorSelect.querySelector(`option[value="${row.dataset.colorId}"]`);
+                    if (option) option.disabled = false;
+                    row.remove();
                 }
+                refreshTotals();
             });
+
+            matrixBody.addEventListener('input', refreshTotals);
+            refreshTotals();
         }
 
-        // 3. Guardar color vía AJAX y agregarlo a todos los selectores (incluida la plantilla)
+        // 3. Guardar color vía AJAX y sumarlo a la tabla de stock
         const saveColorBtn = document.getElementById('save-color-ajax-btn');
         const colorInput = document.getElementById('modal-color-name');
         const colorHexInput = document.getElementById('modal-color-hex');
@@ -101,16 +131,11 @@
                     return data;
                 }))
                 .then(data => {
-                    const option = `<option value="${data.id}"></option>`;
-                    document.querySelectorAll('select[name*="[color_id]"]').forEach(select => {
-                        select.insertAdjacentHTML('beforeend', option);
-                        select.lastElementChild.textContent = data.name;
-                    });
-                    if (template) {
-                        const tplSelect = template.content.querySelector('select[name*="[color_id]"]');
-                        tplSelect.insertAdjacentHTML('beforeend', option);
-                        tplSelect.lastElementChild.textContent = data.name;
-                    }
+                    // El color nuevo queda disponible y se agrega como fila de la tabla
+                    addColorSelect.insertAdjacentHTML('beforeend', `<option value="${data.id}"></option>`);
+                    addColorSelect.lastElementChild.textContent = data.name;
+                    addColorSelect.lastElementChild.dataset.hex = colorHexInput.value;
+                    addColorRow(data.id, data.name, colorHexInput.value);
 
                     colorInput.value = "";
                     bootstrap.Modal.getInstance(document.getElementById('addColorModal')).hide();

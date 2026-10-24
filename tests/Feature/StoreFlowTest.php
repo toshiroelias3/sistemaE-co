@@ -418,6 +418,38 @@ class StoreFlowTest extends TestCase
         $this->get(route('checkout.index'))->assertSee(route('pages.terms'), false);
     }
 
+    public function test_admin_loads_stock_as_a_color_by_size_table(): void
+    {
+        [$s, $m] = Size::orderBy('id')->take(2)->get()->all();
+        [$beige, $navy] = Color::orderBy('id')->take(2)->get()->all();
+
+        $this->actingAs($this->admin())->post(route('admin.products.store'), [
+            'name'        => 'Polera Tabla',
+            'category_id' => $this->product->category_id,
+            'gender'      => 'unisex',
+            'base_price'  => 80,
+            'stock'       => [
+                $beige->id => [$s->id => '5', $m->id => ''],   // M vacío: no se vende en beige
+                $navy->id  => [$s->id => '0', $m->id => '3'],  // S en 0: existe pero agotada
+            ],
+        ])->assertRedirect(route('admin.products.index'));
+
+        $variants = Product::where('slug', 'polera-tabla')->firstOrFail()->variants;
+        $this->assertCount(3, $variants);
+        $this->assertEquals(5, $variants->firstWhere(fn ($v) => $v->color_id == $beige->id && $v->size_id == $s->id)->stock);
+        $this->assertEquals(0, $variants->firstWhere(fn ($v) => $v->color_id == $navy->id && $v->size_id == $s->id)->stock);
+        $this->assertNull($variants->firstWhere(fn ($v) => $v->color_id == $beige->id && $v->size_id == $m->id));
+
+        $this->get(route('admin.products.edit', Product::where('slug', 'polera-tabla')->first()))
+            ->assertOk()->assertSee('id="stock-matrix"', false)->assertSee('name="stock[' . $navy->id . '][' . $m->id . ']"', false);
+
+        // Sin ninguna celda con stock no se puede guardar
+        $this->actingAs($this->admin())->post(route('admin.products.store'), [
+            'name' => 'Vacía', 'category_id' => $this->product->category_id, 'gender' => 'unisex', 'base_price' => 10,
+            'stock' => [$beige->id => [$s->id => '', $m->id => '']],
+        ])->assertSessionHasErrors('variants');
+    }
+
     public function test_clients_cannot_open_the_admin_panel(): void
     {
         $client = User::factory()->create();
