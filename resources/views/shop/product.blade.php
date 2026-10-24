@@ -43,7 +43,7 @@
     @endphp
     <meta property="product:price:amount" content="{{ number_format($product->base_price, 2, '.', '') }}">
     <meta property="product:price:currency" content="PEN">
-    <script type="application/ld+json">@json($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)</script>
+    <script type="application/ld+json">@json($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)</script>
 @endpush
 
 @section('full')

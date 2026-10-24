@@ -44,15 +44,15 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
 // Carrito de Compras
 Route::prefix('carrito')->name('cart.')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('index');
-    Route::post('/add', [CartController::class, 'add'])->name('add');
-    Route::post('/update', [CartController::class, 'update'])->name('update');
+    Route::post('/add', [CartController::class, 'add'])->middleware('throttle:60,1')->name('add');
+    Route::post('/update', [CartController::class, 'update'])->middleware('throttle:60,1')->name('update');
     Route::post('/remove', [CartController::class, 'remove'])->name('remove');
 });
 
 // Proceso de Checkout Híbrido (Invitados / Autenticados)
 Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::get('/', [CheckoutController::class, 'index'])->name('index');
-    Route::post('/', [CheckoutController::class, 'store'])->name('store');
+    Route::post('/', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('store');
     Route::get('/exito/{reference_number}', [CheckoutController::class, 'success'])->name('success');
 });
 

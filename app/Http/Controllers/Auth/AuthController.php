@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
@@ -37,6 +39,9 @@ class AuthController extends Controller
             return redirect()->intended('/')->with('success', 'Sesión iniciada correctamente.');
         }
 
+        // Registro para detectar intentos de acceso indebido (OWASP A09)
+        Log::warning('Inicio de sesión fallido', ['email' => $request->input('email'), 'ip' => $request->ip()]);
+
         // Si falla, regresamos con error genérico (Buena práctica de seguridad para no dar pistas a atacantes)
         return back()->withErrors([
             'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
@@ -54,7 +59,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'], // Exige campo password_confirmation
+            'password' => ['required', 'string', PasswordRule::min(8)->letters()->numbers(), 'confirmed'], // Exige campo password_confirmation
         ]);
 
         // Creación del usuario con Password Hashing seguro (Argon2id/Bcrypt automático en Laravel)
@@ -95,7 +100,7 @@ class AuthController extends Controller
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', PasswordRule::min(8)->letters()->numbers(), 'confirmed'],
         ]);
 
         $status = Password::reset(

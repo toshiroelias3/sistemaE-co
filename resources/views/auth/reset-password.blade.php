@@ -31,7 +31,7 @@
                     <input type="email" class="form-control border-dark-subtle" id="email" name="email" value="{{ old('email', $email) }}" required autocomplete="email">
                 </div>
                 <div class="mb-3">
-                    <label for="password" class="form-label small fw-medium text-muted">Nueva contraseña (mínimo 8 caracteres)</label>
+                    <label for="password" class="form-label small fw-medium text-muted">Nueva contraseña (mínimo 8 caracteres, con letras y números)</label>
                     <input type="password" class="form-control border-dark-subtle" id="password" name="password" required autocomplete="new-password" autofocus>
                 </div>
                 <div class="mb-4">

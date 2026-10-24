@@ -37,7 +37,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="password" class="form-label small fw-medium text-muted">Contraseña</label>
+                    <label for="password" class="form-label small fw-medium text-muted">Contraseña (mínimo 8 caracteres, con letras y números)</label>
                     <input type="password" class="form-control border-dark-subtle" id="password" name="password" required>
                 </div>
 

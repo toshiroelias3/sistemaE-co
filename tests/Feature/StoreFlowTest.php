@@ -450,6 +450,41 @@ class StoreFlowTest extends TestCase
         ])->assertSessionHasErrors('variants');
     }
 
+    public function test_product_text_cannot_break_out_of_structured_data_script(): void
+    {
+        $this->product->update([
+            'name' => 'Polo </script><script>alert(1)</script>',
+            'description' => '</script><img src=x onerror=alert(2)>',
+        ]);
+
+        $html = $this->get(route('shop.product', 'polo-basico'))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $html);
+        $this->assertStringNotContainsString('<img src=x onerror=alert(2)>', $html);
+        $this->assertStringContainsString('</script>', $html); // escapado dentro del JSON-LD
+    }
+
+    public function test_responses_carry_security_headers(): void
+    {
+        $this->get(route('home'))
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('X-Frame-Options', 'DENY')
+            ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+            ->assertHeader('Content-Security-Policy');
+    }
+
+    public function test_weak_passwords_are_rejected_and_checkout_is_rate_limited(): void
+    {
+        $this->post(route('register'), [
+            'name' => 'Ana', 'email' => 'ana2@example.com', 'password' => 'solo-letras', 'password_confirmation' => 'solo-letras',
+        ])->assertSessionHasErrors('password');
+
+        for ($i = 0; $i < 10; $i++) {
+            $this->post(route('checkout.store'), []);
+        }
+        $this->post(route('checkout.store'), [])->assertStatus(429);
+    }
+
     public function test_clients_cannot_open_the_admin_panel(): void
     {
         $client = User::factory()->create();
