@@ -19,7 +19,7 @@ Prendas hechas en Perú, con telas de calidad y buen fit, a precio accesible, de
 - Moneda: soles (S/). Envío S/ 12, gratis desde S/ 250 (desde el 2026-10-24; antes S/ 200), despachos a todo el Perú.
 - Pago: tarjeta de crédito/débito o Yape/Plin (el pago está simulado en el código actual).
 - Cada prenda tiene variantes por talla (S, M, L, XL) y color, con stock por variante.
-- Catálogo con categorías y subcategorías (p. ej. Polos, Colecciones).
+- Secciones Varones y Mujeres. Categorías (2026-10-24): Polos clásicos, Poleras, Conjuntos polera y pantalón, Conjuntos casaca y pantalón buzo, Polos piqué con cuello (varones y mujeres); Tops (solo mujeres); Polos waffle (solo varones). Cada prenda es de varón, de mujer o unisex.
 - Panel admin: productos, categorías, pedidos (con estados logísticos y de pago), clientes y alertas de stock bajo.
 
 ## Capabilities and Constraints

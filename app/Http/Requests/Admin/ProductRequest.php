@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -41,6 +43,7 @@ class ProductRequest extends FormRequest
             'name'        => 'required|string|max:150',
             'slug'        => ['required', 'string', 'max:180', Rule::unique('products', 'slug')->ignore($productId)],
             'category_id' => 'required|exists:categories,id',
+            'gender'      => ['required', Rule::in(array_keys(Product::GENDERS))],
             'base_price'  => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'is_featured' => 'boolean',
@@ -70,6 +73,12 @@ class ProductRequest extends FormRequest
 
                 if ($combos->count() !== $combos->unique()->count()) {
                     $validator->errors()->add('variants', 'Hay variantes repetidas: cada combinación de talla y color debe ser única.');
+                }
+
+                // El género de la prenda debe calzar con la sección de su categoría (ej. Tops solo mujeres)
+                $category = Category::find($this->input('category_id'));
+                if ($category && $this->input('gender') && !in_array($this->input('gender'), $category->allowedGenders(), true)) {
+                    $validator->errors()->add('gender', "La categoría «{$category->name}» es " . strtolower(Category::AUDIENCES[$category->audience]) . '. Elige ese género para la prenda.');
                 }
             },
         ];

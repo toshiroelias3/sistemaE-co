@@ -9,7 +9,34 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'slug', 'is_active', 'parent_id']; // Habilitamos parent_id
+    // Para quién es la categoría (define en qué sección del menú aparece)
+    public const AUDIENCES = [
+        'ambos'   => 'Varones y mujeres',
+        'varones' => 'Solo varones',
+        'mujeres' => 'Solo mujeres',
+    ];
+
+    protected $fillable = ['name', 'slug', 'audience', 'is_active', 'parent_id'];
+
+    /**
+     * Categorías visibles en una sección (varones o mujeres)
+     */
+    public function scopeForGender($query, string $gender)
+    {
+        return $query->whereIn('audience', ['ambos', $gender]);
+    }
+
+    /**
+     * Géneros de prenda que admite la categoría
+     */
+    public function allowedGenders(): array
+    {
+        return match ($this->audience) {
+            'varones' => ['varones'],
+            'mujeres' => ['mujeres'],
+            default   => array_keys(Product::GENDERS),
+        };
+    }
 
     // Relación: Una categoría puede pertenecer a una categoría Padre
     public function parent()

@@ -47,6 +47,7 @@
 
                             <td class="text-start">
                                 <span class="d-block fw-bold text-dark">{{ $product->category->name }}</span>
+                                <span class="badge bg-light text-dark border rounded-0" style="font-size: 0.65rem;">{{ \App\Models\Product::GENDERS[$product->gender] ?? $product->gender }}</span>
                                 @if($product->category->parent)
                                     <span class="text-muted text-uppercase fw-medium tracking-wide" style="font-size: 0.65rem;">
                                         Colección: {{ $product->category->parent->name }}

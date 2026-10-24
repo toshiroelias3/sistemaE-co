@@ -36,6 +36,7 @@ class CategoryRequest extends FormRequest
                 Rule::exists('categories', 'id')->whereNull('parent_id'), // Solo dos niveles
                 Rule::notIn(array_filter([$categoryId])),               // No puede ser su propio padre
             ],
+            'audience' => ['required', Rule::in(array_keys(\App\Models\Category::AUDIENCES))],
             'is_active' => [
                 'nullable',
                 'boolean'

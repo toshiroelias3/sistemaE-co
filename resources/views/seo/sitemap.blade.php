@@ -12,6 +12,13 @@
         <priority>0.3</priority>
     </url>
 @endforeach
+@foreach(\App\Models\Product::SECTIONS as $section => $label)
+    <url>
+        <loc>{{ route('home', ['genero' => $section]) }}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+@endforeach
 @foreach($categories as $category)
     <url>
         <loc>{{ route('home', ['category' => $category->id]) }}</loc>

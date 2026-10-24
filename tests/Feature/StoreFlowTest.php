@@ -145,6 +145,7 @@ class StoreFlowTest extends TestCase
         $this->actingAs($this->admin())->put(route('admin.products.update', $this->product), [
             'name'        => 'Polo Básico',
             'category_id' => $this->product->category_id,
+            'gender'      => 'unisex',
             'base_price'  => 99,
             // is_active omitido = switch desmarcado
             'variants'    => [
@@ -166,6 +167,7 @@ class StoreFlowTest extends TestCase
         $this->actingAs($this->admin())->post(route('admin.products.store'), [
             'name'        => 'Casaca',
             'category_id' => $this->product->category_id,
+            'gender'      => 'unisex',
             'base_price'  => 50,
             'variants'    => [$variant, $variant],
         ])->assertSessionHasErrors('variants');
@@ -231,6 +233,7 @@ class StoreFlowTest extends TestCase
         $this->actingAs($this->admin())->put(route('admin.products.update', $this->product), [
             'name'        => 'Polo Básico',
             'category_id' => $this->product->category_id,
+            'gender'      => 'unisex',
             'base_price'  => 120,
             'is_active'   => 1,
             'variants'    => [['size_id' => Size::first()->id, 'color_id' => Color::first()->id, 'stock' => 5]],
@@ -316,6 +319,41 @@ class StoreFlowTest extends TestCase
 
         $this->get(route('home'))->assertSee('class="tz-row"', false)->assertSee('Novedades');
         $this->get(route('home', ['q' => 'polo']))->assertDontSee('class="tz-row"', false);
+    }
+
+    public function test_sections_show_their_gender_plus_unisex_and_their_categories(): void
+    {
+        $waffle = Category::where('slug', 'polos-waffle')->firstOrFail(); // solo varones
+        $tops = Category::where('slug', 'tops')->firstOrFail();           // solo mujeres
+
+        Product::create(['category_id' => $waffle->id, 'gender' => 'varones', 'name' => 'Waffle Varón', 'slug' => 'waffle-varon', 'base_price' => 60, 'is_active' => true]);
+        Product::create(['category_id' => $tops->id, 'gender' => 'mujeres', 'name' => 'Top Mujer', 'slug' => 'top-mujer', 'base_price' => 40, 'is_active' => true]);
+        // $this->product (Polo Básico) es unisex por defecto
+
+        $this->get(route('home', ['genero' => 'varones']))
+            ->assertOk()
+            ->assertSee('Waffle Varón')->assertSee('Polo Básico')->assertDontSee('Top Mujer')
+            ->assertSee('Polos waffle')
+            ->assertDontSee(route('home', ['genero' => 'varones', 'category' => $tops->id]), false);
+
+        $this->get(route('home', ['genero' => 'mujeres']))
+            ->assertSee('Top Mujer')->assertSee('Polo Básico')->assertDontSee('Waffle Varón');
+
+        // El menú principal tiene las dos secciones
+        $this->get(route('home'))->assertSee('Varones')->assertSee('Mujeres');
+    }
+
+    public function test_product_gender_must_match_its_category_section(): void
+    {
+        $tops = Category::where('slug', 'tops')->firstOrFail();
+
+        $this->actingAs($this->admin())->post(route('admin.products.store'), [
+            'name'        => 'Top Equivocado',
+            'category_id' => $tops->id,
+            'gender'      => 'varones',
+            'base_price'  => 40,
+            'variants'    => [['size_id' => Size::first()->id, 'color_id' => Color::first()->id, 'stock' => 1]],
+        ])->assertSessionHasErrors('gender');
     }
 
     public function test_clients_cannot_open_the_admin_panel(): void

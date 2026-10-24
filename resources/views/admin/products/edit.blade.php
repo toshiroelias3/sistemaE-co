@@ -48,7 +48,7 @@
                         <select class="form-select rounded-0 border-dark-subtle" id="category_id" name="category_id" required>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}" {{ old('category_id', $product->category_id) == $cat->id ? 'selected' : '' }}>
-                                    {{ $cat->name }} @if($cat->parent) (Subcategoría de {{ $cat->parent->name }}) @endif
+                                    {{ $cat->name }} @if($cat->audience !== 'ambos') ({{ strtolower(\App\Models\Category::AUDIENCES[$cat->audience]) }}) @endif
                                 </option>
                             @endforeach
                         </select>
@@ -58,6 +58,8 @@
                         <input type="number" step="0.01" min="0" class="form-control rounded-0 border-dark-subtle" id="base_price" name="base_price" value="{{ old('base_price', $product->base_price) }}" required>
                     </div>
                 </div>
+
+                @include('admin.products.partials.gender-select', ['current' => $product->gender])
 
                 <div class="mb-3">
                     <label for="description" class="form-label small fw-medium text-uppercase text-muted">Descripción o Fit</label>

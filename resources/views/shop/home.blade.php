@@ -8,6 +8,7 @@
     @section('noindex', '1')
 @else
     @section('canonical', route('home', array_filter([
+        'genero' => $gender,
         'category' => request('category'),
         'page' => request('page') > 1 ? request('page') : null,
     ])))
@@ -33,6 +34,21 @@
         </div>
     </div>
 </section>
+
+<!-- Banners de sección: Varones y Mujeres -->
+@if($editorial->count() >= 2 && !request('q') && !request('category') && !$gender)
+    <section class="tz-editorial px-0 mt-1" aria-label="Secciones">
+        @foreach($editorial as $item)
+            <a href="{{ $item['link'] }}">
+                <img src="{{ $item['image']->url(1200) }}" srcset="{{ $item['image']->srcset() }}" sizes="(min-width: 768px) 50vw, 100vw" alt="" loading="lazy" decoding="async">
+                <span>
+                    <span class="d-block tz-display fs-2">{{ $item['title'] }}</span>
+                    <span class="d-block tz-label mt-1">Comprar ahora</span>
+                </span>
+            </a>
+        @endforeach
+    </section>
+@endif
 
 <div class="pt-4 pt-lg-5"></div>
 
@@ -65,7 +81,9 @@
                 @if(request('q'))
                     Resultados para «{{ request('q') }}»
                 @elseif(request('category') && ($current = $categories->firstWhere('id', request('category')) ?? $categories->flatMap->children->firstWhere('id', request('category'))))
-                    {{ $current->name }}
+                    {{ $current->name }}{{ $gender ? ' para ' . strtolower(\App\Models\Product::SECTIONS[$gender]) : '' }}
+                @elseif($gender)
+                    {{ \App\Models\Product::SECTIONS[$gender] }}
                 @elseif(request('sort') === 'newest')
                     Novedades
                 @else
@@ -76,7 +94,7 @@
         </div>
 
         <form action="{{ route('home') }}#catalogo" method="GET" class="d-flex align-items-center gap-2">
-            @foreach(['category', 'q'] as $keep)
+            @foreach(['genero', 'category', 'q'] as $keep)
                 @if(request($keep))
                     <input type="hidden" name="{{ $keep }}" value="{{ request($keep) }}">
                 @endif
@@ -90,17 +108,17 @@
         </form>
     </div>
 
-    <!-- Subcategorías de la categoría elegida -->
-    @foreach($categories as $cat)
-        @if($cat->children->isNotEmpty() && (request('category') == $cat->id || $cat->children->pluck('id')->contains(request('category'))))
-            <nav class="d-flex flex-wrap gap-2 mb-4" aria-label="Subcategorías de {{ $cat->name }}">
-                <a href="{{ route('home', ['category' => $cat->id]) }}#catalogo" class="btn btn-sm {{ request('category') == $cat->id ? 'btn-dark' : 'btn-outline-dark' }}">Todo {{ $cat->name }}</a>
-                @foreach($cat->children as $child)
-                    <a href="{{ route('home', ['category' => $child->id]) }}#catalogo" class="btn btn-sm {{ request('category') == $child->id ? 'btn-dark' : 'btn-outline-dark' }}">{{ $child->name }}</a>
-                @endforeach
-            </nav>
-        @endif
-    @endforeach
+    <!-- Categorías de la sección actual (o de toda la tienda) -->
+    @unless(request('q'))
+        <nav class="d-flex flex-wrap gap-2 mb-4" aria-label="Categorías">
+            <a href="{{ route('home', array_filter(['genero' => $gender])) }}#catalogo" class="btn btn-sm {{ !request('category') ? 'btn-dark' : 'btn-outline-dark' }}">
+                Todo{{ $gender ? ' ' . strtolower(\App\Models\Product::SECTIONS[$gender]) : '' }}
+            </a>
+            @foreach($categories as $cat)
+                <a href="{{ route('home', array_filter(['genero' => $gender, 'category' => $cat->id])) }}#catalogo" class="btn btn-sm {{ request('category') == $cat->id ? 'btn-dark' : 'btn-outline-dark' }}">{{ $cat->name }}</a>
+            @endforeach
+        </nav>
+    @endunless
 
     @if($products->isEmpty())
         <div class="text-center py-5">
@@ -124,21 +142,6 @@
         </div>
     @endif
 </section>
-
-<!-- Banners por categoría -->
-@if($editorial->count() >= 2 && !request('q') && !request('category'))
-    <section class="tz-editorial px-0" aria-label="Categorías destacadas">
-        @foreach($editorial as $item)
-            <a href="{{ route('home', ['category' => $item['category']->id]) }}#catalogo">
-                <img src="{{ $item['image']->url(1200) }}" srcset="{{ $item['image']->srcset() }}" sizes="(min-width: 768px) 50vw, 100vw" alt="" loading="lazy" decoding="async">
-                <span>
-                    <span class="d-block tz-display fs-2">{{ $item['category']->name }}</span>
-                    <span class="d-block tz-label mt-1">Comprar ahora</span>
-                </span>
-            </a>
-        @endforeach
-    </section>
-@endif
 
 <!-- Beneficios -->
 <section class="tz-benefits py-5 mt-5" aria-label="Beneficios">

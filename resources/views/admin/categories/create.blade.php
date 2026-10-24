@@ -40,6 +40,8 @@
             </select>
         </div>
 
+        @include('admin.categories.partials.audience-select')
+
         <div class="mb-4">
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" role="switch" id="is_active" name="is_active" value="1" checked>

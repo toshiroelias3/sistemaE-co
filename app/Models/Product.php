@@ -9,7 +9,28 @@ class Product extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['category_id', 'name', 'slug', 'description', 'base_price', 'is_featured', 'is_active'];
+    // Para quién es la prenda: una unisex aparece en Varones y en Mujeres
+    public const GENDERS = [
+        'varones' => 'Varones',
+        'mujeres' => 'Mujeres',
+        'unisex'  => 'Unisex',
+    ];
+
+    // Secciones de la tienda (en la URL: ?genero=varones)
+    public const SECTIONS = [
+        'varones' => 'Varones',
+        'mujeres' => 'Mujeres',
+    ];
+
+    protected $fillable = ['category_id', 'gender', 'name', 'slug', 'description', 'base_price', 'is_featured', 'is_active'];
+
+    /**
+     * Prendas de una sección: las de ese género y las unisex
+     */
+    public function scopeForGender($query, string $gender)
+    {
+        return $query->whereIn('gender', [$gender, 'unisex']);
+    }
 
     // Un producto pertenece a una categoría
     public function category() {

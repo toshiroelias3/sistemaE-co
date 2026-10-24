@@ -87,7 +87,10 @@
                 </nav>
 
                 <h1 class="tz-label fs-6 mb-2" style="letter-spacing: 0.06em;">{{ $product->name }}</h1>
-                <p class="tz-price fs-5 mb-4">S/ {{ number_format($product->base_price, 2) }}</p>
+                <p class="tz-price fs-5 mb-1">S/ {{ number_format($product->base_price, 2) }}</p>
+                <p class="small text-muted mb-4">
+                    {{ $product->gender === 'unisex' ? 'Unisex: para varones y mujeres' : 'Para ' . strtolower(\App\Models\Product::GENDERS[$product->gender] ?? '') }}
+                </p>
 
                 @if($sizes->isEmpty())
                     <p class="border p-3 mb-4">Esta prenda está agotada por ahora.</p>

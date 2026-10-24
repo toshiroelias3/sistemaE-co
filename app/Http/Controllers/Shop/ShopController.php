@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
 
 class ShopController extends Controller
@@ -14,10 +15,15 @@ class ShopController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Traer categorías principales activas con sus subcategorías
+        // Sección elegida (varones / mujeres); cualquier otro valor se ignora
+        $gender = array_key_exists($request->genero, Product::SECTIONS) ? $request->genero : null;
+
+        // 1. Traer categorías principales activas (solo las de la sección, si hay una elegida)
         $categories = Category::where('is_active', true)
             ->whereNull('parent_id')
+            ->when($gender, fn ($q) => $q->forGender($gender))
             ->with('children')
+            ->orderBy('id')
             ->get();
 
         // 2. Consulta base de productos activos ordenando las imágenes por Portada (is_primary)
@@ -36,6 +42,11 @@ class ShopController extends Controller
                 $q->where('name', 'LIKE', "%{$search}%")
                   ->orWhere('description', 'LIKE', "%{$search}%");
             });
+        }
+
+        // Filtro por sección: las prendas de ese género y las unisex
+        if ($gender) {
+            $query->forGender($gender);
         }
 
         // 4. Filtro por Categoría
@@ -82,20 +93,20 @@ class ShopController extends Controller
             ->latest()
             ->first();
 
-        // 8. Banners por categoría: la foto de portada de una prenda activa de cada una
-        $editorial = $categories->take(2)->map(function ($category) {
-            $ids = $category->children->pluck('id')->push($category->id);
-            $image = \App\Models\ProductImage::whereHas('product', fn ($q) => $q->where('is_active', true)->whereIn('category_id', $ids))
-                ->orderByDesc('is_primary')
-                ->latest()
-                ->first();
+        // 8. Banners de sección (Varones / Mujeres) con la foto de portada de una prenda de cada una
+        $editorial = collect(Product::SECTIONS)->map(function ($label, $section) {
+            // Primero una prenda propia de la sección; si no hay, una unisex
+            $image = collect([[$section], [$section, 'unisex']])->map(fn ($genders) => ProductImage::whereHas(
+                    'product', fn ($q) => $q->where('is_active', true)->whereIn('gender', $genders)
+                )->orderByDesc('is_primary')->latest()->first()
+            )->filter()->first();
 
-            return ['category' => $category, 'image' => $image];
-        })->filter(fn ($item) => $item['image']);
+            return ['title' => $label, 'link' => route('home', ['genero' => $section]) . '#catalogo', 'image' => $image];
+        })->filter(fn ($item) => $item['image'])->values();
 
-        // 9. Filas deslizables de la portada (solo sin filtros ni búsqueda): novedades y una por categoría
+        // 9. Filas deslizables de la portada (solo sin filtros ni búsqueda): novedades, varones y mujeres
         $rows = collect();
-        if (!$request->hasAny(['q', 'category', 'sort', 'page'])) {
+        if (!$request->hasAny(['q', 'category', 'sort', 'page', 'genero'])) {
             $withImages = ['images' => fn ($q) => $q->orderBy('is_primary', 'desc')];
 
             $rows->push([
@@ -104,23 +115,18 @@ class ShopController extends Controller
                 'products' => Product::where('is_active', true)->with($withImages)->latest()->take(8)->get(),
             ]);
 
-            foreach ($categories as $category) {
-                $ids = $category->children->pluck('id')->push($category->id);
-                $categoryProducts = Product::where('is_active', true)->whereIn('category_id', $ids)->with($withImages)->latest()->take(8)->get();
-
-                if ($categoryProducts->count() >= 2) {
-                    $rows->push([
-                        'title' => $category->name,
-                        'link' => route('home', ['category' => $category->id]) . '#catalogo',
-                        'products' => $categoryProducts,
-                    ]);
-                }
+            foreach (Product::SECTIONS as $section => $label) {
+                $rows->push([
+                    'title' => $label,
+                    'link' => route('home', ['genero' => $section]) . '#catalogo',
+                    'products' => Product::where('is_active', true)->forGender($section)->with($withImages)->latest()->take(8)->get(),
+                ]);
             }
 
             $rows = $rows->filter(fn ($row) => $row['products']->count() >= 2);
         }
 
-        return view('shop.home', compact('products', 'categories', 'featured', 'editorial', 'rows'));
+        return view('shop.home', compact('products', 'categories', 'featured', 'editorial', 'rows', 'gender'));
     }
 
     /**

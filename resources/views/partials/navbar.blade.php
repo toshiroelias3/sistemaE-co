@@ -16,7 +16,7 @@
             <!-- Menú principal (escritorio) -->
             <nav class="tz-menu-bar d-none d-lg-flex" aria-label="Principal">
                 <div class="tz-menu-item">
-                    <a href="{{ route('home') }}#catalogo" class="{{ request()->routeIs('home') && !request('category') && !request('sort') ? 'active' : '' }}">
+                    <a href="{{ route('home') }}#catalogo" class="{{ request()->routeIs('home') && !request('category') && !request('sort') && !request('genero') ? 'active' : '' }}">
                         Ver todo <i class="bi bi-chevron-down"></i>
                     </a>
                     <div class="tz-submenu">
@@ -31,21 +31,18 @@
                     <a href="{{ route('home', ['sort' => 'newest']) }}#catalogo" class="{{ request('sort') === 'newest' ? 'active' : '' }}">Novedades</a>
                 </div>
 
-                @foreach($navCategories as $navCategory)
-                    @php $isActive = request('category') == $navCategory->id || $navCategory->children->pluck('id')->contains(request('category')); @endphp
+                {{-- Secciones Varones y Mujeres: cada una con las categorías que le corresponden --}}
+                @foreach(\App\Models\Product::SECTIONS as $section => $label)
                     <div class="tz-menu-item">
-                        <a href="{{ route('home', ['category' => $navCategory->id]) }}#catalogo" class="{{ $isActive ? 'active' : '' }}">
-                            {{ $navCategory->name }}
-                            @if($navCategory->children->isNotEmpty()) <i class="bi bi-chevron-down"></i> @endif
+                        <a href="{{ route('home', ['genero' => $section]) }}#catalogo" class="{{ request('genero') === $section ? 'active' : '' }}">
+                            {{ $label }} <i class="bi bi-chevron-down"></i>
                         </a>
-                        @if($navCategory->children->isNotEmpty())
-                            <div class="tz-submenu">
-                                <a href="{{ route('home', ['category' => $navCategory->id]) }}#catalogo">Todo {{ $navCategory->name }}</a>
-                                @foreach($navCategory->children as $child)
-                                    <a href="{{ route('home', ['category' => $child->id]) }}#catalogo">{{ $child->name }}</a>
-                                @endforeach
-                            </div>
-                        @endif
+                        <div class="tz-submenu">
+                            <a href="{{ route('home', ['genero' => $section]) }}#catalogo">Todo {{ strtolower($label) }}</a>
+                            @foreach($navCategories->whereIn('audience', ['ambos', $section]) as $navCategory)
+                                <a href="{{ route('home', ['genero' => $section, 'category' => $navCategory->id]) }}#catalogo">{{ $navCategory->name }}</a>
+                            @endforeach
+                        </div>
                     </div>
                 @endforeach
             </nav>
@@ -116,15 +113,13 @@
         <nav class="tz-menu tz-label" aria-label="Menú">
             <a href="{{ route('home') }}#catalogo">Ver todo</a>
             <a href="{{ route('home', ['sort' => 'newest']) }}#catalogo">Novedades</a>
-            @foreach($navCategories as $navCategory)
-                <a href="{{ route('home', ['category' => $navCategory->id]) }}#catalogo">{{ $navCategory->name }}</a>
-                @if($navCategory->children->isNotEmpty())
-                    <div class="tz-menu-sub">
-                        @foreach($navCategory->children as $child)
-                            <a href="{{ route('home', ['category' => $child->id]) }}#catalogo">{{ $child->name }}</a>
-                        @endforeach
-                    </div>
-                @endif
+            @foreach(\App\Models\Product::SECTIONS as $section => $label)
+                <a href="{{ route('home', ['genero' => $section]) }}#catalogo">{{ $label }}</a>
+                <div class="tz-menu-sub">
+                    @foreach($navCategories->whereIn('audience', ['ambos', $section]) as $navCategory)
+                        <a href="{{ route('home', ['genero' => $section, 'category' => $navCategory->id]) }}#catalogo">{{ $navCategory->name }}</a>
+                    @endforeach
+                </div>
             @endforeach
             @auth
                 <a href="{{ route('customer.orders.index') }}">Mis pedidos</a>

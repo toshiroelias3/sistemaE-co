@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with('navCategories', Category::where('is_active', true)
                 ->whereNull('parent_id')
                 ->with(['children' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
-                ->orderBy('name')
+                ->orderBy('id') // En el orden en que se definieron
                 ->get());
         });
     }

@@ -18,6 +18,7 @@
                         <th class="py-3 text-start">Nombre</th>
                         <th class="py-3 text-start">Slug (URL)</th>
                         <th class="py-3">Tipo</th>
+                        <th class="py-3">Sección</th>
                         <th class="py-3">Prendas</th>
                         <th class="py-3">Estado</th>
                         <th class="py-3">Acciones</th>
@@ -40,6 +41,7 @@
                                     </span>
                                 @endif
                             </td>
+                            <td>{{ \App\Models\Category::AUDIENCES[$cat->audience] ?? $cat->audience }}</td>
                             <td class="fw-bold">{{ $cat->products_count }}</td>
                             <td>
                                 @if($cat->is_active)
@@ -65,7 +67,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-muted py-4">No hay categorías registradas en el sistema.</td>
+                            <td colspan="8" class="text-muted py-4">No hay categorías registradas en el sistema.</td>
                         </tr>
                     @endforelse 
                 </tbody>

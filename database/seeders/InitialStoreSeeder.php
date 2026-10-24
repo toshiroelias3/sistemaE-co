@@ -40,9 +40,7 @@ class InitialStoreSeeder extends Seeder
             Color::firstOrCreate(['name' => $color['name']], ['hex_code' => $color['hex']]);
         }
 
-        // 4. Categorías Base
-        foreach (['Polos', 'Colecciones'] as $name) {
-            Category::firstOrCreate(['slug' => Str::slug($name)], ['name' => $name]);
-        }
+        // 4. Categorías del catálogo (secciones Varones / Mujeres)
+        $this->call(CatalogCategoriesSeeder::class);
     }
 }
