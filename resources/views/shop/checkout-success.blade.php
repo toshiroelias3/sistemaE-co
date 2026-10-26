@@ -17,7 +17,7 @@
                 @if($order->payment_status === 'paid')
                     <p class="text-muted lead">Tu pago está confirmado y ya estamos preparando tu pedido.</p>
                 @else
-                    <p class="text-muted lead">Tu pedido está reservado. Págalo con Yape para completarlo.</p>
+                    <p class="text-muted lead">Tu pedido está reservado. Completa el pago para que lo preparemos.</p>
                 @endif
                 <div class="badge bg-light text-dark border p-2 px-3">
                     N.° de pedido: {{ $order->reference_number }}
@@ -25,7 +25,7 @@
             </div>
 
             @if($order->payment_status !== 'paid' && $order->status !== 'cancelled')
-                @include('shop.partials.yape-instructions', ['order' => $order])
+                @include('shop.partials.payment-instructions', ['order' => $order])
             @endif
 
             <!-- Detalles del Pedido -->

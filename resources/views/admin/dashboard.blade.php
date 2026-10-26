@@ -15,7 +15,7 @@
 
 @if($pendingPayments)
     <div class="alert alert-warning rounded-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <span><i class="bi bi-phone me-2"></i><strong>{{ $pendingPayments }} {{ $pendingPayments === 1 ? 'pedido espera' : 'pedidos esperan' }}</strong> que valides su pago por Yape.</span>
+        <span><i class="bi bi-phone me-2"></i><strong>{{ $pendingPayments }} {{ $pendingPayments === 1 ? 'pedido espera' : 'pedidos esperan' }}</strong> que valides su pago por Yape o Plin.</span>
         <a href="{{ route('admin.orders.index', ['status' => 'pending']) }}" class="btn btn-sm btn-dark rounded-0">Revisar pagos</a>
     </div>
 @endif

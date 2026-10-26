@@ -48,7 +48,10 @@
                             <td class="text-muted">{{ $order->created_at->format('d/m/Y H:i') }}</td>
                             <td class="fw-bold">S/ {{ number_format($order->total_amount, 2) }}</td>
                             <td>@include('partials.order-badges', ['order' => $order, 'only' => 'status'])</td>
-                            <td>@include('partials.order-badges', ['order' => $order, 'only' => 'payment'])</td>
+                            <td>
+                                @include('partials.order-badges', ['order' => $order, 'only' => 'payment'])
+                                <span class="d-block text-muted mt-1" style="font-size: 0.7rem;">{{ \App\Models\Order::PAYMENT_METHODS[$order->payment_method] ?? '' }}</span>
+                            </td>
                             <td>
                                 <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-dark rounded-0 text-uppercase tracking-wider px-3" style="font-size: 0.7rem;">
                                     Ver Detalle

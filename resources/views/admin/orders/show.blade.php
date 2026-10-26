@@ -96,6 +96,16 @@
     <div class="col-12 col-lg-4">
         <div class="card border-0 shadow-sm rounded-0 bg-white p-4">
             <h5 class="fw-bold text-uppercase tracking-wider small border-bottom pb-2 mb-4">Acciones de Despacho</h5>
+
+            <div class="small mb-4 p-3 bg-light">
+                <span class="d-block text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Medio de pago</span>
+                <span class="fw-semibold">{{ \App\Models\Order::PAYMENT_METHODS[$order->payment_method] ?? $order->payment_method }}</span>
+                @if($order->payment_method === 'mercadopago')
+                    <span class="d-block text-muted mt-1">Se confirma solo cuando Mercado Pago aprueba el pago.@if($order->mp_payment_id) Operación N.° {{ $order->mp_payment_id }}.@endif</span>
+                @else
+                    <span class="d-block text-muted mt-1">Revisa la captura por WhatsApp y marca el pago como «Pagado».</span>
+                @endif
+            </div>
             
             <form action="{{ route('admin.orders.update', $order->id) }}" method="POST">
                 @csrf

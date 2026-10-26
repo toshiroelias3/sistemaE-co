@@ -17,7 +17,7 @@
             </div>
 
             @if($order->payment_status !== 'paid' && $order->status !== 'cancelled')
-                @include('shop.partials.yape-instructions', ['order' => $order])
+                @include('shop.partials.payment-instructions', ['order' => $order])
             @endif
 
             <!-- Línea de seguimiento -->

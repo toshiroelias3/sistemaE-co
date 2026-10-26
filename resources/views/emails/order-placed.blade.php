@@ -7,21 +7,27 @@
         <p>Hola {{ $order->customer_name }}, recibimos tu pedido <strong>{{ $order->reference_number }}</strong>.</p>
 
         <div style="background:#f3f2ef;padding:16px 20px;margin:20px 0;">
-            <p style="margin:0 0 8px;font-weight:bold;">Para completar tu compra, págalo con Yape:</p>
-            <p style="margin:0 0 4px;">Monto: <strong>S/ {{ number_format($order->total_amount, 2) }}</strong></p>
-            @if(config('tienda.yape'))
-                <p style="margin:0 0 4px;">Número: <strong>{{ trim(chunk_split(config('tienda.yape'), 3, ' ')) }}</strong> ({{ config('tienda.yape_titular') }})</p>
-            @endif
-            <p style="margin:0 0 4px;">Mensaje del Yape: <strong>{{ $order->reference_number }}</strong></p>
-            <p style="margin:8px 0 0;">
-                Luego envíanos la captura
-                @if(config('tienda.whatsapp'))
-                    por <a href="https://wa.me/{{ config('tienda.whatsapp') }}?text={{ rawurlencode("Hola TEZAN, envío la captura del Yape de mi pedido {$order->reference_number}.") }}" style="color:#111;">WhatsApp</a>.
-                @else
-                    a {{ config('tienda.email') }}.
+            @if($order->payment_method === 'mercadopago')
+                <p style="margin:0 0 8px;font-weight:bold;">Pago con Mercado Pago</p>
+                <p style="margin:0 0 8px;">Si ya pagaste, te avisaremos por correo en cuanto Mercado Pago lo confirme. Si aún no completaste el pago, puedes hacerlo aquí:</p>
+                <p style="margin:0;"><a href="{{ route('checkout.mercadopago.pay', $order->reference_number) }}" style="display:inline-block;background:#111;color:#fff;padding:10px 18px;text-decoration:none;">Pagar S/ {{ number_format($order->total_amount, 2) }}</a></p>
+            @else
+                <p style="margin:0 0 8px;font-weight:bold;">Para completar tu compra, págalo con Yape o Plin:</p>
+                <p style="margin:0 0 4px;">Monto: <strong>S/ {{ number_format($order->total_amount, 2) }}</strong></p>
+                @if(config('tienda.yape'))
+                    <p style="margin:0 0 4px;">Número (Yape o Plin): <strong>{{ trim(chunk_split(config('tienda.yape'), 3, ' ')) }}</strong> ({{ config('tienda.yape_titular') }})</p>
                 @endif
-                Separamos tus prendas mientras validamos el pago.
-            </p>
+                <p style="margin:0 0 4px;">Mensaje: <strong>{{ $order->reference_number }}</strong></p>
+                <p style="margin:8px 0 0;">
+                    Luego envíanos la captura
+                    @if(config('tienda.whatsapp'))
+                        por <a href="https://wa.me/{{ config('tienda.whatsapp') }}?text={{ rawurlencode("Hola TEZAN, envío la captura del pago de mi pedido {$order->reference_number}.") }}" style="color:#111;">WhatsApp</a>.
+                    @else
+                        a {{ config('tienda.email') }}.
+                    @endif
+                    Separamos tus prendas mientras validamos el pago.
+                </p>
+            @endif
         </div>
 
         <table style="width:100%;border-collapse:collapse;">

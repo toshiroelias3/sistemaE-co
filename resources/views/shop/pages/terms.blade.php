@@ -30,9 +30,9 @@
 
         <h2 class="tz-label mt-5 mb-3">4. Pedidos y pago</h2>
         <p>
-            Por ahora el único medio de pago es Yape. Al confirmar tu pedido te mostramos el monto exacto y el número al que debes yapear, y te enviamos esa información por correo.
-            Las prendas quedan separadas mientras validamos el pago. El pedido se considera confirmado cuando validamos tu Yape; te avisaremos por correo.
-            Si el pago no se realiza, podemos cancelar el pedido y liberar las prendas.
+            Puedes pagar con tarjeta de crédito o débito a través de Mercado Pago, o con Yape o Plin. Los pagos con tarjeta los procesa Mercado Pago en su propia plataforma.
+            Con Yape o Plin, al confirmar tu pedido te mostramos el monto exacto y el número, y te enviamos esa información por correo; las prendas quedan separadas mientras validamos el pago.
+            El pedido se considera confirmado cuando el pago es aprobado por Mercado Pago o validado por nosotros; te avisaremos por correo. Si el pago no se realiza, podemos cancelar el pedido y liberar las prendas.
         </p>
 
         <h2 class="tz-label mt-5 mb-3">5. Envíos</h2>

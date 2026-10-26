@@ -53,7 +53,7 @@
             </span>
             <span class="d-flex align-items-center gap-2" aria-label="Medios de pago">
                 <span>Pagas con</span>
-                @foreach(['Yape'] as $medio)
+                @foreach(['Mercado Pago', 'Yape', 'Plin'] as $medio)
                     <span class="border px-2 py-1 bg-white text-dark fw-semibold" style="font-size: 0.75rem;">{{ $medio }}</span>
                 @endforeach
             </span>

@@ -7,12 +7,14 @@ use App\Mail\OrderPlaced;
 use App\Models\Order;
 use App\Models\ProductVariant;
 use App\Support\Cart;
+use App\Support\MercadoPago;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class CheckoutController extends Controller
 {
@@ -40,8 +42,8 @@ class CheckoutController extends Controller
     public function success($reference_number)
     {
         $order = Order::where('reference_number', $reference_number)
-                      ->with(['items.product.images', 'items.variant.size', 'items.variant.color'])
-                      ->firstOrFail();
+            ->with(['items.product.images', 'items.variant.size', 'items.variant.color'])
+            ->firstOrFail();
 
         return view('shop.checkout-success', compact('order'));
     }
@@ -53,15 +55,15 @@ class CheckoutController extends Controller
     {
         // 1. Validaciones del Formulario de Checkout
         $request->validate([
-            'customer_name'    => 'required|string|max:255',
-            'customer_email'   => 'required|email|max:255',
+            'customer_name' => 'required|string|max:255',
+            'customer_email' => 'required|email|max:255',
             'shipping_address' => 'required|string|max:255',
-            'city'             => 'required|string|max:255',
-            'phone'            => ['required', 'string', 'max:30', 'regex:/^[0-9+\s-]{6,30}$/'],
-            'payment_method'   => 'required|in:yape',
-            'terms'            => 'accepted',
+            'city' => 'required|string|max:255',
+            'phone' => ['required', 'string', 'max:30', 'regex:/^[0-9+\s-]{6,30}$/'],
+            'payment_method' => ['required', Rule::in(MercadoPago::isEnabled() ? ['yape', 'mercadopago'] : ['yape'])],
+            'terms' => 'accepted',
         ], [
-            'phone.regex'    => 'Ingresa un número de teléfono válido.',
+            'phone.regex' => 'Ingresa un número de teléfono válido.',
             'terms.accepted' => 'Debes aceptar los términos y condiciones.',
         ]);
 
@@ -75,7 +77,7 @@ class CheckoutController extends Controller
         $customerEmail = Auth::check() ? Auth::user()->email : strip_tags($request->customer_email);
 
         // Concatenar dirección exacta con la ciudad/distrito
-        $fullAddress = strip_tags($request->shipping_address) . ' - ' . strip_tags($request->city);
+        $fullAddress = strip_tags($request->shipping_address).' - '.strip_tags($request->city);
 
         // 2. Iniciamos transacción para asegurar consistencia e integridad de datos
         DB::beginTransaction();
@@ -87,7 +89,7 @@ class CheckoutController extends Controller
             foreach ($cart as $item) {
                 $variant = ProductVariant::with('product')->lockForUpdate()->find($item['variant_id']);
 
-                if (!$variant || !$variant->product || !$variant->product->is_active) {
+                if (! $variant || ! $variant->product || ! $variant->product->is_active) {
                     throw new \RuntimeException("La prenda {$item['name']} ya no está disponible. Retírala de tu bolsa para continuar.");
                 }
                 if ($variant->stock < $item['quantity']) {
@@ -97,21 +99,22 @@ class CheckoutController extends Controller
                 $lines[] = ['variant' => $variant, 'quantity' => (int) $item['quantity'], 'price' => $variant->product->base_price];
             }
 
-            // B) Cálculo del Subtotal y Envío (gratis desde S/ 200)
+            // B) Cálculo del Subtotal y Envío
             $subtotal = array_sum(array_map(fn ($line) => $line['price'] * $line['quantity'], $lines));
             $totalAmount = $subtotal + Cart::shippingFor($subtotal);
 
             // C) Crear la cabecera del Pedido (Soporta Autenticados e Invitados)
             $order = Order::create([
-                'user_id'          => Auth::id(),
-                'customer_name'    => $customerName,
-                'customer_email'   => $customerEmail,
-                'reference_number' => 'TZN-' . date('Ymd') . '-' . strtoupper(Str::random(12)),
-                'total_amount'     => $totalAmount,
+                'user_id' => Auth::id(),
+                'customer_name' => $customerName,
+                'customer_email' => $customerEmail,
+                'reference_number' => 'TZN-'.date('Ymd').'-'.strtoupper(Str::random(12)),
+                'total_amount' => $totalAmount,
                 'shipping_address' => $fullAddress,
-                'phone'            => strip_tags($request->phone),
-                'status'           => 'pending', // Se pasa a "procesando" cuando el admin valida el Yape
-                'payment_status'   => 'unpaid',
+                'phone' => strip_tags($request->phone),
+                'status' => 'pending', // Pasa a "procesando" cuando se confirma el pago
+                'payment_status' => 'unpaid',
+                'payment_method' => $request->payment_method,
             ]);
 
             // D) Registrar los ítems y restar stock real
@@ -119,10 +122,10 @@ class CheckoutController extends Controller
                 $line['variant']->decrement('stock', $line['quantity']);
 
                 $order->items()->create([
-                    'product_id'         => $line['variant']->product_id,
+                    'product_id' => $line['variant']->product_id,
                     'product_variant_id' => $line['variant']->id,
-                    'quantity'           => $line['quantity'],
-                    'price'              => $line['price'],
+                    'quantity' => $line['quantity'],
+                    'price' => $line['price'],
                 ]);
             }
 
@@ -138,16 +141,70 @@ class CheckoutController extends Controller
                 Log::error("No se pudo enviar la confirmación del pedido {$order->reference_number}: {$e->getMessage()}");
             }
 
-            // G) Redirigir a la pantalla de agradecimiento con el número de orden
+            // G) Con Mercado Pago, el cliente pasa a pagar en su página; con Yape o Plin, ve las instrucciones
+            if ($order->payment_method === 'mercadopago') {
+                return $this->redirectToMercadoPago($order);
+            }
+
             return redirect()->route('checkout.success', $order->reference_number);
 
         } catch (\RuntimeException $e) {
             DB::rollBack();
+
             return back()->withInput()->with('error', $e->getMessage());
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Error al procesar checkout: ' . $e->getMessage());
+            Log::error('Error al procesar checkout: '.$e->getMessage());
+
             return back()->withInput()->with('error', 'No pudimos procesar tu pedido. Inténtalo nuevamente en unos minutos.');
+        }
+    }
+
+    /**
+     * Reintenta (o retoma) el pago con Mercado Pago de un pedido aún no pagado
+     */
+    public function payWithMercadoPago(string $reference_number)
+    {
+        $order = Order::where('reference_number', $reference_number)->firstOrFail();
+
+        if ($order->payment_method !== 'mercadopago' || $order->payment_status === 'paid' || $order->status === 'cancelled') {
+            return redirect()->route('checkout.success', $order->reference_number);
+        }
+
+        return $this->redirectToMercadoPago($order);
+    }
+
+    /**
+     * El cliente vuelve desde Mercado Pago. El estado se consulta a la API; los parámetros de la URL no se toman como prueba de pago.
+     */
+    public function mercadoPagoReturn(Request $request, string $reference_number)
+    {
+        $order = Order::where('reference_number', $reference_number)->firstOrFail();
+        $paymentId = $request->query('payment_id') ?? $request->query('collection_id');
+
+        if ($paymentId && MercadoPago::isEnabled()) {
+            $synced = MercadoPago::syncPayment((string) $paymentId);
+            $order = $synced && $synced->is($order) ? $synced : $order->fresh();
+        }
+
+        $message = match (true) {
+            $order->payment_status === 'paid' => ['success', '¡Pago aprobado! Ya estamos preparando tu pedido.'],
+            $order->payment_status === 'failed' => ['error', 'Mercado Pago rechazó el pago. Puedes intentarlo de nuevo con otro medio.'],
+            default => ['success', 'Recibimos tu pedido. Te avisaremos por correo cuando Mercado Pago confirme el pago.'],
+        };
+
+        return redirect()->route('checkout.success', $order->reference_number)->with(...$message);
+    }
+
+    private function redirectToMercadoPago(Order $order)
+    {
+        try {
+            return redirect()->away(MercadoPago::createPreference($order));
+        } catch (\Throwable $e) {
+            Log::error("Mercado Pago no disponible para el pedido {$order->reference_number}: {$e->getMessage()}");
+
+            return redirect()->route('checkout.success', $order->reference_number)
+                ->with('error', 'No pudimos conectar con Mercado Pago. Tu pedido está reservado: intenta pagar de nuevo en unos minutos o escríbenos.');
         }
     }
 }

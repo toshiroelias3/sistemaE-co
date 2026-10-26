@@ -19,6 +19,16 @@ Guía paso a paso para poner la tienda en internet. Marca cada casilla al comple
 - [ ] **Dirección completa** (con distrito y ciudad) en `TIENDA_DIRECCION`.
 - [ ] Opcional: redes sociales (`TIENDA_INSTAGRAM`, `TIENDA_FACEBOOK`, `TIENDA_TIKTOK`) y política de cambios.
 
+### Mercado Pago
+
+1. Entra a https://www.mercadopago.com.pe/developers/panel/app y crea una aplicación **Checkout Pro** (pagos online).
+2. **Credenciales de prueba** (empiezan con `TEST-`): copia el *Access Token* en `MERCADOPAGO_ACCESS_TOKEN` de tu `.env` local, ejecuta `php artisan config:clear` y haz compras de prueba con las tarjetas de prueba que muestra Mercado Pago.
+3. **Al publicar**, usa las **credenciales de producción** solo en el `.env` del servidor (nunca en git ni por chat).
+4. En la aplicación, sección **Webhooks**: URL `https://<tu-dominio>/webhooks/mercadopago`, evento **Pagos**. Copia la **clave secreta** que te muestra en `MERCADOPAGO_WEBHOOK_SECRET`.
+5. Mientras la tienda no tenga https, Mercado Pago no puede avisar los pagos: en local el pedido se confirma cuando el cliente vuelve a la tienda después de pagar.
+
+Yape y Plin no necesitan configuración: usan `TIENDA_YAPE` (el mismo número para ambos).
+
 ## 2. Contratar hosting y dominio
 
 Necesitas un servidor con **PHP 8.3+** (con extensiones `gd`, `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`), **MySQL 8**, **Composer** y **Node 20+** (o compilar los assets en tu PC y subirlos).
@@ -55,7 +65,7 @@ Las fotos de productos viven en `storage/app/public/products`. Si ya cargaste pr
 
 ## 5. Después de publicar
 
-- [ ] Abrir la tienda en el celular y hacer **una compra real de prueba** con Yape: revisar que llegue el correo, validar el pago en el admin y que llegue el correo de pago confirmado.
+- [ ] Hacer **una compra real con Mercado Pago** (debe confirmarse sola) y **otra con Yape o Plin** (validarla en el admin). Revisar que lleguen los correos.
 - [ ] Probar "¿Olvidaste tu contraseña?" con una cuenta de cliente.
 - [ ] Registrar una hoja de prueba en el **Libro de Reclamaciones** y responderla desde el admin.
 - [ ] Dar de alta el sitio en **Google Search Console** y enviar `https://<tu-dominio>/sitemap.xml`.

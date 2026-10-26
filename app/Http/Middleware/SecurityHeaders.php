@@ -27,7 +27,7 @@ class SecurityHeaders
 
         // CSP: solo recursos propios y los proveedores que la tienda usa. Se omite mientras corre
         // el servidor de desarrollo de Vite (npm run dev), que sirve los assets desde otro puerto.
-        if (!(app()->environment('local') && file_exists(public_path('hot')))) {
+        if (! (app()->environment('local') && file_exists(public_path('hot')))) {
             $response->headers->set('Content-Security-Policy', implode('; ', [
                 "default-src 'self'",
                 // Las vistas usan scripts en línea pequeños; se permiten, pero no scripts de otros dominios
@@ -38,7 +38,8 @@ class SecurityHeaders
                 "connect-src 'self'",
                 "object-src 'none'",
                 "base-uri 'self'",
-                "form-action 'self'",
+                // El checkout redirige a Mercado Pago después de enviar el formulario
+                "form-action 'self' https://*.mercadopago.com.pe https://*.mercadopago.com https://*.mercadolibre.com",
                 "frame-ancestors 'none'",
             ]));
         }

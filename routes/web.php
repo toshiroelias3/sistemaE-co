@@ -1,18 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\AdminOrderController;
-use App\Http\Controllers\Shop\ShopController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ComplaintController as AdminComplaintController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\Shop\CheckoutController;
-use App\Http\Controllers\Shop\CustomerOrderController;
-use App\Http\Controllers\Shop\SeoController;
 use App\Http\Controllers\Shop\ComplaintController;
-use App\Http\Controllers\Admin\ComplaintController as AdminComplaintController;
+use App\Http\Controllers\Shop\CustomerOrderController;
+use App\Http\Controllers\Shop\MercadoPagoWebhookController;
+use App\Http\Controllers\Shop\SeoController;
+use App\Http\Controllers\Shop\ShopController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +38,9 @@ Route::view('/envios-y-pagos', 'shop.pages.shipping')->name('pages.shipping');
 Route::view('/terminos-y-condiciones', 'shop.pages.terms')->name('pages.terms');
 Route::view('/politica-de-privacidad', 'shop.pages.privacy')->name('pages.privacy');
 
+// Notificaciones de pago de Mercado Pago (sin CSRF; se valida la firma y se consulta el pago a su API)
+Route::post('/webhooks/mercadopago', MercadoPagoWebhookController::class)->middleware('throttle:120,1')->name('webhooks.mercadopago');
+
 // SEO: mapa del sitio y reglas para buscadores
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
@@ -54,8 +58,11 @@ Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::get('/', [CheckoutController::class, 'index'])->name('index');
     Route::post('/', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('store');
     Route::get('/exito/{reference_number}', [CheckoutController::class, 'success'])->name('success');
-});
 
+    // Mercado Pago: pagar/reintentar y volver desde su página
+    Route::get('/pagar/{reference_number}', [CheckoutController::class, 'payWithMercadoPago'])->middleware('throttle:10,1')->name('mercadopago.pay');
+    Route::get('/mercadopago/retorno/{reference_number}', [CheckoutController::class, 'mercadoPagoReturn'])->name('mercadopago.return');
+});
 
 // ==========================================
 // 2. AUTENTICACIÓN Y REGISTRO (GUESTS)
@@ -74,7 +81,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/restablecer-contrasena', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1')->name('password.update');
 });
 
-
 // ==========================================
 // 3. ZONA PRIVADA DE CLIENTES (AUTH)
 // ==========================================
@@ -86,15 +92,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/mis-pedidos/{id}', [CustomerOrderController::class, 'show'])->name('customer.orders.show');
 });
 
-
 // ==========================================
 // 4. PANEL DE ADMINISTRACIÓN (ADMIN)
 // ==========================================
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    
+
     // Dashboard Principal
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-    
+
     // CRUDs de Catálogo
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('products', ProductController::class)->except(['show']);
@@ -102,7 +107,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Utilidades de Productos (Imágenes y Colores AJAX)
     Route::delete('/products/images/{image}', [ProductController::class, 'destroyImage'])->name('products.images.destroy');
     Route::post('/colors/ajax-store', [ProductController::class, 'ajaxStoreColor'])->name('colors.ajax.store');
-
 
     // Definir foto principal/portada del producto
     Route::post('/products/{product}/images/{image}/set-primary', [ProductController::class, 'setPrimaryImage'])->name('products.images.setPrimary');

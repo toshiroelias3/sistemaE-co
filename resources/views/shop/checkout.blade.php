@@ -81,18 +81,30 @@
                     </div>
                 </div>
 
-                <!-- Sección 3: Pago con Yape -->
-                <h5 class="fw-bold mb-3 border-bottom pb-2 pt-2">3. Pago con Yape</h5>
-                <input type="hidden" name="payment_method" value="yape">
+                <!-- Sección 3: Medio de pago -->
+                <h5 class="fw-bold mb-3 border-bottom pb-2 pt-2">3. Medio de pago</h5>
+                @php $mpEnabled = \App\Support\MercadoPago::isEnabled(); $selected = old('payment_method', $mpEnabled ? 'mercadopago' : 'yape'); @endphp
 
-                <div class="p-3 mb-4" style="background: var(--tz-warm);">
-                    <p class="fw-semibold mb-2"><i class="bi bi-phone me-2"></i>Pagas con Yape después de confirmar tu pedido</p>
-                    <ol class="small mb-0 ps-3">
-                        <li>Confirma tu pedido con el botón de abajo.</li>
-                        <li>Te mostramos el monto exacto y el número de Yape{{ config('tienda.yape') ? ' (' . config('tienda.yape') . ')' : '' }} a nombre de {{ config('tienda.yape_titular') }}.</li>
-                        <li>Yapea y envíanos la captura por WhatsApp con tu número de pedido.</li>
-                        <li>Validamos el pago y preparamos tu envío.</li>
-                    </ol>
+                <div class="mb-4 d-grid gap-2" role="radiogroup" aria-label="Medio de pago">
+                    @if($mpEnabled)
+                        <label class="border p-3 d-flex gap-3 align-items-start" style="cursor: pointer;">
+                            <input class="form-check-input mt-1" type="radio" name="payment_method" value="mercadopago" @checked($selected === 'mercadopago')>
+                            <span>
+                                <span class="fw-semibold d-block">Tarjeta de crédito o débito (Mercado Pago)</span>
+                                <span class="small text-muted">Pagas en la página segura de Mercado Pago y tu pedido se confirma al instante.</span>
+                            </span>
+                        </label>
+                    @endif
+                    <label class="border p-3 d-flex gap-3 align-items-start" style="cursor: pointer;">
+                        <input class="form-check-input mt-1" type="radio" name="payment_method" value="yape" @checked($selected === 'yape')>
+                        <span>
+                            <span class="fw-semibold d-block">Yape o Plin</span>
+                            <span class="small text-muted">
+                                Al confirmar te mostramos el monto y el número{{ config('tienda.yape') ? ' (' . config('tienda.yape') . ')' : '' }}.
+                                Yapeas o plineas y nos envías la captura por WhatsApp; validamos el pago y preparamos tu envío.
+                            </span>
+                        </span>
+                    </label>
                 </div>
 
                 <!-- Términos y Política de privacidad -->
@@ -106,7 +118,7 @@
 
                 <!-- Botón Confirmar (se deshabilita al enviar para evitar pedidos duplicados) -->
                 <button type="submit" class="btn btn-dark w-100 fw-bold py-3" onclick="setTimeout(() => this.disabled = true, 0)">
-                    Confirmar pedido y pagar con Yape
+                    Confirmar pedido
                 </button>
             </form>
         </div>

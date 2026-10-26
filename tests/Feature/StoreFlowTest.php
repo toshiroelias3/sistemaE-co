@@ -2,24 +2,25 @@
 
 namespace Tests\Feature;
 
+use App\Mail\ComplaintRegistered;
+use App\Mail\OrderPlaced;
+use App\Mail\PaymentConfirmed;
 use App\Models\Category;
 use App\Models\Color;
+use App\Models\Complaint;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Size;
 use App\Models\User;
-use App\Mail\ComplaintRegistered;
-use App\Mail\OrderPlaced;
-use App\Mail\PaymentConfirmed;
-use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
-use App\Models\Complaint;
 use App\Support\ProductImages;
-use Illuminate\Support\Facades\Mail;
 use Database\Seeders\InitialStoreSeeder;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -36,16 +37,16 @@ class StoreFlowTest extends TestCase
 
         $this->product = Product::create([
             'category_id' => Category::first()->id,
-            'name'        => 'Polo Básico',
-            'slug'        => 'polo-basico',
-            'base_price'  => 120,
-            'is_active'   => true,
+            'name' => 'Polo Básico',
+            'slug' => 'polo-basico',
+            'base_price' => 120,
+            'is_active' => true,
         ]);
         $this->product->variants()->create([
-            'size_id'  => Size::first()->id,
+            'size_id' => Size::first()->id,
             'color_id' => Color::first()->id,
-            'sku'      => 'TZN-TEST-1',
-            'stock'    => 5,
+            'sku' => 'TZN-TEST-1',
+            'stock' => 5,
         ]);
     }
 
@@ -58,25 +59,48 @@ class StoreFlowTest extends TestCase
     {
         $this->postJson(route('cart.add'), [
             'product_id' => $this->product->id,
-            'size_id'    => Size::first()->id,
-            'color_id'   => Color::first()->id,
-            'quantity'   => $quantity,
+            'size_id' => Size::first()->id,
+            'color_id' => Color::first()->id,
+            'quantity' => $quantity,
         ])->assertOk()->assertJson(['cart_count' => $quantity]);
     }
 
-    private function checkout(): Order
+    private function checkout(string $paymentMethod = 'yape'): Order
     {
         $this->post(route('checkout.store'), [
-            'customer_name'    => 'Ana Test',
-            'customer_email'   => 'ana@example.com',
+            'customer_name' => 'Ana Test',
+            'customer_email' => 'ana@example.com',
             'shipping_address' => 'Av. Siempre Viva 123',
-            'city'             => 'Lima',
-            'phone'            => '987654321',
-            'payment_method'   => 'yape',
-            'terms'            => '1',
+            'city' => 'Lima',
+            'phone' => '987654321',
+            'payment_method' => $paymentMethod,
+            'terms' => '1',
         ])->assertRedirect();
 
         return Order::latest('id')->firstOrFail();
+    }
+
+    /**
+     * Pedido pagado con Mercado Pago y respuesta falsa de la API para su pago.
+     */
+    private function mercadoPagoOrder(string $paymentStatus, float $amount = 132.0): Order
+    {
+        config(['services.mercadopago.access_token' => 'APP_USR-prueba']);
+        Http::preventStrayRequests();
+        Http::fake([
+            'api.mercadopago.com/checkout/preferences' => Http::response(['id' => 'pref-1', 'init_point' => 'https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=pref-1']),
+            'api.mercadopago.com/v1/payments/555' => fn () => Http::response([
+                'id' => 555,
+                'status' => $paymentStatus,
+                'external_reference' => Order::latest('id')->value('reference_number'),
+                'transaction_amount' => $amount,
+                'currency_id' => 'PEN',
+            ]),
+        ]);
+
+        $this->addToCart(1);
+
+        return $this->checkout('mercadopago');
     }
 
     public function test_seeder_creates_a_real_admin(): void
@@ -148,12 +172,12 @@ class StoreFlowTest extends TestCase
         $this->checkout();
 
         $this->actingAs($this->admin())->put(route('admin.products.update', $this->product), [
-            'name'        => 'Polo Básico',
+            'name' => 'Polo Básico',
             'category_id' => $this->product->category_id,
-            'gender'      => 'unisex',
-            'base_price'  => 99,
+            'gender' => 'unisex',
+            'base_price' => 99,
             // is_active omitido = switch desmarcado
-            'variants'    => [
+            'variants' => [
                 ['size_id' => Size::skip(1)->first()->id, 'color_id' => Color::first()->id, 'stock' => 7],
             ],
         ])->assertRedirect(route('admin.products.index'));
@@ -170,11 +194,11 @@ class StoreFlowTest extends TestCase
         $variant = ['size_id' => Size::first()->id, 'color_id' => Color::first()->id, 'stock' => 1];
 
         $this->actingAs($this->admin())->post(route('admin.products.store'), [
-            'name'        => 'Casaca',
+            'name' => 'Casaca',
             'category_id' => $this->product->category_id,
-            'gender'      => 'unisex',
-            'base_price'  => 50,
-            'variants'    => [$variant, $variant],
+            'gender' => 'unisex',
+            'base_price' => 50,
+            'variants' => [$variant, $variant],
         ])->assertSessionHasErrors('variants');
     }
 
@@ -194,7 +218,7 @@ class StoreFlowTest extends TestCase
             ->assertOk()
             ->assertSee('<meta property="og:title" content="Polo Básico | TEZAN">', false)
             ->assertSee('<meta property="og:type" content="product">', false)
-            ->assertSee('<link rel="canonical" href="' . route('shop.product', 'polo-basico') . '">', false)
+            ->assertSee('<link rel="canonical" href="'.route('shop.product', 'polo-basico').'">', false)
             ->assertSee('application/ld+json', false)
             ->assertSee('"priceCurrency":"PEN"', false)
             ->assertSee('"price":"120.00"', false)
@@ -228,7 +252,7 @@ class StoreFlowTest extends TestCase
         $this->get(route('seo.robots'))
             ->assertOk()
             ->assertSee('Disallow: /checkout')
-            ->assertSee('Sitemap: ' . route('seo.sitemap'));
+            ->assertSee('Sitemap: '.route('seo.sitemap'));
     }
 
     public function test_uploaded_photos_get_light_webp_versions_that_are_cleaned_up(): void
@@ -236,13 +260,13 @@ class StoreFlowTest extends TestCase
         Storage::fake('public');
 
         $this->actingAs($this->admin())->put(route('admin.products.update', $this->product), [
-            'name'        => 'Polo Básico',
+            'name' => 'Polo Básico',
             'category_id' => $this->product->category_id,
-            'gender'      => 'unisex',
-            'base_price'  => 120,
-            'is_active'   => 1,
-            'variants'    => [['size_id' => Size::first()->id, 'color_id' => Color::first()->id, 'stock' => 5]],
-            'images'      => [UploadedFile::fake()->image('polo.jpg', 1600, 2000)],
+            'gender' => 'unisex',
+            'base_price' => 120,
+            'is_active' => 1,
+            'variants' => [['size_id' => Size::first()->id, 'color_id' => Color::first()->id, 'stock' => 5]],
+            'images' => [UploadedFile::fake()->image('polo.jpg', 1600, 2000)],
         ])->assertRedirect(route('admin.products.index'));
 
         $image = $this->product->images()->firstOrFail();
@@ -283,7 +307,7 @@ class StoreFlowTest extends TestCase
         $response = $this->post(route('complaints.store'), $this->complaintData());
 
         $complaint = Complaint::firstOrFail();
-        $this->assertSame('LR-' . now()->format('Y') . '-' . str_pad($complaint->id, 6, '0', STR_PAD_LEFT), $complaint->code);
+        $this->assertSame('LR-'.now()->format('Y').'-'.str_pad($complaint->id, 6, '0', STR_PAD_LEFT), $complaint->code);
         $this->assertSame('pendiente', $complaint->status);
         $response->assertRedirect(route('complaints.show', $complaint->token));
         Mail::assertSent(ComplaintRegistered::class, fn ($mail) => $mail->hasTo('ana@example.com'));
@@ -353,11 +377,11 @@ class StoreFlowTest extends TestCase
         $tops = Category::where('slug', 'tops')->firstOrFail();
 
         $this->actingAs($this->admin())->post(route('admin.products.store'), [
-            'name'        => 'Top Equivocado',
+            'name' => 'Top Equivocado',
             'category_id' => $tops->id,
-            'gender'      => 'varones',
-            'base_price'  => 40,
-            'variants'    => [['size_id' => Size::first()->id, 'color_id' => Color::first()->id, 'stock' => 1]],
+            'gender' => 'varones',
+            'base_price' => 40,
+            'variants' => [['size_id' => Size::first()->id, 'color_id' => Color::first()->id, 'stock' => 1]],
         ])->assertSessionHasErrors('gender');
     }
 
@@ -424,13 +448,13 @@ class StoreFlowTest extends TestCase
         [$beige, $navy] = Color::orderBy('id')->take(2)->get()->all();
 
         $this->actingAs($this->admin())->post(route('admin.products.store'), [
-            'name'        => 'Polera Tabla',
+            'name' => 'Polera Tabla',
             'category_id' => $this->product->category_id,
-            'gender'      => 'unisex',
-            'base_price'  => 80,
-            'stock'       => [
+            'gender' => 'unisex',
+            'base_price' => 80,
+            'stock' => [
                 $beige->id => [$s->id => '5', $m->id => ''],   // M vacío: no se vende en beige
-                $navy->id  => [$s->id => '0', $m->id => '3'],  // S en 0: existe pero agotada
+                $navy->id => [$s->id => '0', $m->id => '3'],  // S en 0: existe pero agotada
             ],
         ])->assertRedirect(route('admin.products.index'));
 
@@ -441,7 +465,7 @@ class StoreFlowTest extends TestCase
         $this->assertNull($variants->firstWhere(fn ($v) => $v->color_id == $beige->id && $v->size_id == $m->id));
 
         $this->get(route('admin.products.edit', Product::where('slug', 'polera-tabla')->first()))
-            ->assertOk()->assertSee('id="stock-matrix"', false)->assertSee('name="stock[' . $navy->id . '][' . $m->id . ']"', false);
+            ->assertOk()->assertSee('id="stock-matrix"', false)->assertSee('name="stock['.$navy->id.']['.$m->id.']"', false);
 
         // Sin ninguna celda con stock no se puede guardar
         $this->actingAs($this->admin())->post(route('admin.products.store'), [
@@ -483,6 +507,94 @@ class StoreFlowTest extends TestCase
             $this->post(route('checkout.store'), []);
         }
         $this->post(route('checkout.store'), [])->assertStatus(429);
+    }
+
+    public function test_mercado_pago_checkout_sends_the_order_to_pay_on_mercado_pago(): void
+    {
+        Mail::fake();
+        $order = $this->mercadoPagoOrder('approved');
+
+        $this->assertSame('mercadopago', $order->payment_method);
+        $this->assertSame('unpaid', $order->payment_status);
+        $this->assertSame('pref-1', $order->mp_preference_id);
+
+        Http::assertSent(fn ($request) => $request->url() === 'https://api.mercadopago.com/checkout/preferences'
+            && $request['external_reference'] === $order->reference_number
+            && collect($request['items'])->sum(fn ($item) => $item['unit_price'] * $item['quantity']) == 132.0 // 120 + 12 de envío
+            && collect($request['items'])->every(fn ($item) => $item['currency_id'] === 'PEN'));
+
+        // Retomar el pago reutiliza el flujo y vuelve a Mercado Pago
+        $this->get(route('checkout.mercadopago.pay', $order->reference_number))
+            ->assertRedirect('https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=pref-1');
+    }
+
+    public function test_mercado_pago_webhook_confirms_the_payment_once(): void
+    {
+        Mail::fake();
+        $order = $this->mercadoPagoOrder('approved');
+
+        $this->postJson(route('webhooks.mercadopago').'?data.id=555&type=payment', ['type' => 'payment', 'data' => ['id' => '555']])->assertOk();
+        $this->postJson(route('webhooks.mercadopago').'?data.id=555&type=payment', ['type' => 'payment', 'data' => ['id' => '555']])->assertOk();
+
+        $order->refresh();
+        $this->assertSame('paid', $order->payment_status);
+        $this->assertSame('processing', $order->status);
+        $this->assertSame('555', $order->mp_payment_id);
+        Mail::assertSent(PaymentConfirmed::class, 1);
+    }
+
+    public function test_mercado_pago_webhook_rejects_a_forged_signature(): void
+    {
+        Mail::fake();
+        $order = $this->mercadoPagoOrder('approved');
+        config(['services.mercadopago.webhook_secret' => 'secreto']);
+
+        $this->postJson(route('webhooks.mercadopago').'?data.id=555&type=payment', ['type' => 'payment', 'data' => ['id' => '555']], [
+            'x-signature' => 'ts=1700000000,v1=firma-falsa',
+            'x-request-id' => 'req-1',
+        ])->assertStatus(401);
+        $this->assertSame('unpaid', $order->fresh()->payment_status);
+
+        $valid = hash_hmac('sha256', 'id:555;request-id:req-1;ts:1700000000;', 'secreto');
+        $this->postJson(route('webhooks.mercadopago').'?data.id=555&type=payment', ['type' => 'payment', 'data' => ['id' => '555']], [
+            'x-signature' => "ts=1700000000,v1={$valid}",
+            'x-request-id' => 'req-1',
+        ])->assertOk();
+        $this->assertSame('paid', $order->fresh()->payment_status);
+    }
+
+    public function test_mercado_pago_payment_for_less_than_the_total_is_not_accepted(): void
+    {
+        Mail::fake();
+        $order = $this->mercadoPagoOrder('approved', amount: 1.0);
+
+        $this->postJson(route('webhooks.mercadopago').'?data.id=555&type=payment', ['type' => 'payment', 'data' => ['id' => '555']])->assertOk();
+
+        $this->assertSame('unpaid', $order->fresh()->payment_status);
+        Mail::assertNotSent(PaymentConfirmed::class);
+    }
+
+    public function test_returning_from_mercado_pago_uses_the_api_status_not_the_url(): void
+    {
+        Mail::fake();
+        $order = $this->mercadoPagoOrder('rejected');
+
+        // La URL dice "approved", pero la API dice "rejected": manda la API
+        $this->get(route('checkout.mercadopago.return', $order->reference_number).'?payment_id=555&status=approved')
+            ->assertRedirect(route('checkout.success', $order->reference_number))
+            ->assertSessionHas('error');
+
+        $this->assertSame('failed', $order->fresh()->payment_status);
+        $this->get(route('checkout.success', $order->reference_number))->assertSee('Intentar el pago de nuevo');
+    }
+
+    public function test_mercado_pago_is_not_offered_without_credentials(): void
+    {
+        config(['services.mercadopago.access_token' => null]);
+        $this->addToCart(1);
+
+        $this->get(route('checkout.index'))->assertDontSee('value="mercadopago"', false);
+        $this->post(route('checkout.store'), ['payment_method' => 'mercadopago'])->assertSessionHasErrors('payment_method');
     }
 
     public function test_clients_cannot_open_the_admin_panel(): void

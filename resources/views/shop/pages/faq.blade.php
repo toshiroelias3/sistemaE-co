@@ -8,7 +8,7 @@
     $free = number_format(\App\Support\Cart::FREE_SHIPPING_FROM, 0);
     $faqs = [
         ['¿Cuánto cuesta el envío?', "El envío cuesta S/ {$ship} y es gratis en compras desde S/ {$free}. Despachamos a todo el Perú."],
-        ['¿Qué medios de pago aceptan?', 'Por ahora aceptamos pagos con Yape. Al confirmar tu pedido te mostramos el monto y el número; luego nos envías la captura por WhatsApp y validamos el pago.'],
+        ['¿Qué medios de pago aceptan?', 'Puedes pagar con tarjeta de crédito o débito a través de Mercado Pago (tu pedido se confirma al instante), o con Yape o Plin: te mostramos el monto y el número, nos envías la captura por WhatsApp y validamos el pago.'],
         ['¿Necesito una cuenta para comprar?', 'No. Puedes comprar como invitado. Si creas una cuenta, verás todos tus pedidos en «Mis pedidos».'],
         ['¿Cómo sigo mi pedido?', 'Al comprar recibes un número de pedido que empieza con TZN. Si compraste con tu cuenta, en «Mis pedidos» ves su estado: procesando, en ruta o entregado.'],
         ['¿Cómo sé si hay stock de mi talla?', 'En la página de cada prenda, al elegir el color, las tallas agotadas aparecen tachadas. Si quedan pocas unidades, te lo indicamos.'],

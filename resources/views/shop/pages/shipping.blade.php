@@ -19,8 +19,8 @@
 
         <h2 class="tz-label mt-5 mb-3">Pagos</h2>
         <ul>
-            <li>Yape: al confirmar tu pedido te mostramos el monto exacto y el número. Envíanos la captura por WhatsApp con tu número de pedido.</li>
-            <li>Separamos tus prendas mientras validamos el pago y te avisamos por correo cuando lo confirmemos.</li>
+            <li><strong>Tarjeta de crédito o débito</strong> a través de Mercado Pago: pagas en su página segura y tu pedido se confirma al instante.</li>
+            <li><strong>Yape o Plin</strong>: al confirmar tu pedido te mostramos el monto exacto y el número. Envíanos la captura por WhatsApp con tu número de pedido; separamos tus prendas mientras validamos el pago.</li>
         </ul>
         <p>Todos los precios están en soles (S/).</p>
 

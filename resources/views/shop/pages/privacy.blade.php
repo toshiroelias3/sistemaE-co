@@ -27,11 +27,11 @@
             <li><strong>Al crear una cuenta:</strong> nombre, correo electrónico y contraseña (guardada cifrada).</li>
             <li><strong>En el Libro de Reclamaciones:</strong> nombre, tipo y número de documento, domicilio, teléfono, correo y, si eres menor de edad, el nombre de tu padre, madre o apoderado.</li>
         </ul>
-        <p>No guardamos datos de tarjetas: los pagos se hacen por Yape, fuera de esta web.</p>
+        <p>No guardamos datos de tarjetas. Los pagos con tarjeta se procesan en Mercado Pago, que trata esos datos según sus propias políticas; los pagos con Yape o Plin se realizan desde tu aplicación, fuera de esta web.</p>
 
         <h2 class="tz-label mt-5 mb-3">3. Para qué los usamos</h2>
         <ul>
-            <li>Procesar, cobrar y entregar tus pedidos, y avisarte de su estado.</li>
+            <li>Procesar, cobrar y entregar tus pedidos, y avisarte de su estado. Para pagos con tarjeta compartimos con Mercado Pago tu nombre, correo y el detalle del pedido.</li>
             <li>Responder tus consultas y reclamos.</li>
             <li>Mantener tu cuenta y tu historial de pedidos.</li>
         </ul>

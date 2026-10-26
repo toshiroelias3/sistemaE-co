@@ -145,7 +145,7 @@
                     </details>
                     <details class="tz-details border-bottom">
                         <summary class="tz-label">Pago</summary>
-                        <p class="small pb-3 mb-0">Paga con Yape al confirmar tu pedido. Te mostramos el monto y el número, y validamos el pago por WhatsApp.</p>
+                        <p class="small pb-3 mb-0">Paga con tarjeta de crédito o débito a través de Mercado Pago, o con Yape o Plin.</p>
                     </details>
                 </div>
             </div>

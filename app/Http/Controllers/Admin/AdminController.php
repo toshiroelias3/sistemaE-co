@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
-use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
@@ -33,8 +34,8 @@ class AdminController extends Controller
             ->get();
 
         // Pedidos esperando que se valide el Yape, y aviso de seguridad si la clave sigue siendo la de ejemplo
-        $pendingPayments = Order::where('payment_status', 'unpaid')->where('status', '!=', 'cancelled')->count();
-        $usesDefaultPassword = \Illuminate\Support\Facades\Hash::check('admin1234', auth()->user()->password);
+        $pendingPayments = Order::where('payment_method', 'yape')->where('payment_status', 'unpaid')->where('status', '!=', 'cancelled')->count();
+        $usesDefaultPassword = Hash::check('admin1234', auth()->user()->password);
 
         return view('admin.dashboard', compact(
             'pendingPayments',

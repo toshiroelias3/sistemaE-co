@@ -13,18 +13,27 @@ class Order extends Model
      * Estados logísticos y de pago con su etiqueta visible.
      */
     public const STATUSES = [
-        'pending'    => 'Pendiente',
+        'pending' => 'Pendiente',
         'processing' => 'Procesando',
-        'shipped'    => 'En ruta',
-        'completed'  => 'Entregado',
-        'cancelled'  => 'Cancelado',
+        'shipped' => 'En ruta',
+        'completed' => 'Entregado',
+        'cancelled' => 'Cancelado',
     ];
 
     public const PAYMENT_STATUSES = [
-        'unpaid'   => 'Por pagar',
-        'paid'     => 'Pagado',
-        'failed'   => 'Fallido',
+        'unpaid' => 'Por pagar',
+        'paid' => 'Pagado',
+        'failed' => 'Fallido',
         'refunded' => 'Reembolsado',
+    ];
+
+    /**
+     * Medios de pago aceptados. Yape y Plin usan el mismo número y se validan a mano;
+     * Mercado Pago se confirma solo con su webhook.
+     */
+    public const PAYMENT_METHODS = [
+        'mercadopago' => 'Mercado Pago',
+        'yape' => 'Yape o Plin',
     ];
 
     /**
@@ -40,6 +49,10 @@ class Order extends Model
         'phone',
         'status',
         'payment_status',
+        'payment_method',
+        'mp_preference_id',
+        'mp_init_point',
+        'mp_payment_id',
     ];
 
     /**
@@ -48,7 +61,7 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class)->withDefault([
-            'name'  => $this->customer_name ?? 'Cliente Invitado',
+            'name' => $this->customer_name ?? 'Cliente Invitado',
             'email' => $this->customer_email ?? 'N/A',
         ]);
     }
