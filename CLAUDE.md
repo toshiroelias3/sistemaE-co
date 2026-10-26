@@ -26,6 +26,8 @@ vendor/bin/pint                # code style (Laravel Pint)
 - The local XAMPP PHP (`C:\xampp\php83`) does not enable `pdo_sqlite`, and `php artisan test` spawns a subprocess that drops `-d` flags. Run tests with:
   `php -d extension_dir=C:/xampp/php83/ext -d extension=pdo_sqlite vendor/phpunit/phpunit/phpunit [--filter=name]`
 - End-to-end store/admin flows are covered in `tests/Feature/StoreFlowTest.php`.
+- Outbound https (Mercado Pago, Gmail) from the local XAMPP PHP needs a CA bundle: `curl.cainfo`/`openssl.cafile` in `C:
+mpp\php83\php.ini` point to `C:/xampp/php83/extras/ssl/cacert.pem` (from https://curl.se/ca/cacert.pem). A `cURL error 60` means that setting is missing.
 
 ## Architecture
 
