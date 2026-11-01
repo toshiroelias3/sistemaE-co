@@ -9,7 +9,7 @@
         <div style="background:#f3f2ef;padding:16px 20px;margin:20px 0;">
             @if($order->payment_method === 'mercadopago')
                 <p style="margin:0 0 8px;font-weight:bold;">Pago con Mercado Pago</p>
-                <p style="margin:0 0 8px;">Si ya pagaste, te avisaremos por correo en cuanto Mercado Pago lo confirme. Si aún no completaste el pago, puedes hacerlo aquí:</p>
+                <p style="margin:0 0 8px;">Si ya pagaste, te avisaremos por correo en cuanto Mercado Pago lo confirme. Si aún no completaste el pago, hazlo dentro de {{ config('tienda.horas_para_pagar') }} horas; después el pedido se cancela:</p>
                 <p style="margin:0;"><a href="{{ route('checkout.mercadopago.pay', $order->reference_number) }}" style="display:inline-block;background:#111;color:#fff;padding:10px 18px;text-decoration:none;">Pagar S/ {{ number_format($order->total_amount, 2) }}</a></p>
             @else
                 <p style="margin:0 0 8px;font-weight:bold;">Para completar tu compra, págalo con Yape o Plin:</p>
@@ -25,7 +25,7 @@
                     @else
                         a {{ config('tienda.email') }}.
                     @endif
-                    Separamos tus prendas mientras validamos el pago.
+                    Separamos tus prendas durante {{ config('tienda.horas_para_pagar') }} horas; si no recibimos el pago, el pedido se cancela.
                 </p>
             @endif
         </div>
@@ -44,7 +44,8 @@
             <tr><td style="padding:8px 0;font-weight:bold;">Total</td><td style="padding:8px 0;text-align:right;font-weight:bold;">S/ {{ number_format($order->total_amount, 2) }}</td></tr>
         </table>
 
-        <p style="margin-top:20px;"><strong>Entrega:</strong> {{ $order->shipping_address }}<br><strong>Teléfono:</strong> {{ $order->phone }}</p>
+        <p style="margin-top:20px;"><strong>Plazo de entrega, desde que confirmamos el pago:</strong> Lima {{ config('tienda.entrega_lima') }}; provincias {{ config('tienda.entrega_provincias') }}.</p>
+        <p><strong>Entrega:</strong> {{ $order->shipping_address }}<br><strong>Teléfono:</strong> {{ $order->phone }}</p>
         <p style="color:#6b6760;font-size:12px;margin-top:24px;">{{ config('tienda.razon_social') }}@if(config('tienda.ruc')), RUC {{ config('tienda.ruc') }}@endif. ¿Dudas? Escríbenos a {{ config('tienda.email') }}.</p>
     </div>
 </body>

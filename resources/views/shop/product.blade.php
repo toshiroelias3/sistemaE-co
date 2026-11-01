@@ -141,7 +141,7 @@
                     @endif
                     <details class="tz-details">
                         <summary class="tz-label">Envío</summary>
-                        <p class="small pb-3 mb-0">Despachamos a todo el Perú. Envío gratis en compras desde S/ {{ number_format(\App\Support\Cart::FREE_SHIPPING_FROM, 0) }}; si no, cuesta S/ {{ number_format(\App\Support\Cart::SHIPPING_COST, 0) }}.</p>
+                        <p class="small pb-3 mb-0">Despachamos a todo el Perú. Desde que confirmamos tu pago, entregamos en Lima {{ config('tienda.entrega_lima') }} y en provincias {{ config('tienda.entrega_provincias') }}. Envío gratis en compras desde S/ {{ number_format(\App\Support\Cart::FREE_SHIPPING_FROM, 0) }}; si no, cuesta S/ {{ number_format(\App\Support\Cart::SHIPPING_COST, 0) }}.</p>
                     </details>
                     <details class="tz-details border-bottom">
                         <summary class="tz-label">Pago</summary>

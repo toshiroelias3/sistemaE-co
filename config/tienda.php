@@ -15,6 +15,16 @@ return [
     'direccion' => env('TIENDA_DIRECCION'),
     'email' => env('TIENDA_EMAIL', 'tezancompany@gmail.com'),
 
+    // Clave del admin al crearlo por primera vez; vacía = se genera una aleatoria
+    'admin_password' => env('ADMIN_INITIAL_PASSWORD'),
+
+    // Plazos que se prometen al cliente, contados desde que se confirma el pago
+    'entrega_lima' => env('TIENDA_ENTREGA_LIMA', 'dentro de las 12 horas'),
+    'entrega_provincias' => env('TIENDA_ENTREGA_PROVINCIAS', 'de 1 a 2 días'),
+
+    // Tiempo para pagar; después el pedido se cancela y el stock se libera
+    'horas_para_pagar' => (int) env('TIENDA_HORAS_PARA_PAGAR', 24),
+
     // Yape: número al que el cliente paga y titular que verá en su app
     'yape' => env('TIENDA_YAPE'),
     'yape_titular' => env('TIENDA_YAPE_TITULAR', 'TEZAN S.A.C.'),

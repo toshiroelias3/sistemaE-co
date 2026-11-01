@@ -18,7 +18,7 @@
 <div class="row justify-content-center">
     <article class="col-12 col-lg-8 col-xl-7" style="max-width: 72ch;">
         <h1 class="tz-display fs-1 mb-2">Términos y condiciones</h1>
-        <p class="text-muted small mb-5">Última actualización: 25 de octubre de 2026</p>
+        <p class="text-muted small mb-5">Última actualización: 1 de noviembre de 2026</p>
 
         <h2 class="tz-label mt-4 mb-3">1. Quiénes somos</h2>
         <p>
@@ -35,7 +35,7 @@
 
         <h2 class="tz-label mt-5 mb-3">3. Productos, precios y stock</h2>
         <ul>
-            <li>Los precios están expresados en soles (S/) y son el <strong>precio final, con los impuestos de ley incluidos</strong>. El costo de envío se muestra por separado antes de confirmar el pedido.</li>
+            <li>Los precios están expresados en soles (S/) y son el <strong>precio final e incluyen IGV</strong>. El costo de envío se muestra por separado antes de confirmar el pedido.</li>
             <li>Las fotos son referenciales: los colores pueden variar ligeramente según la pantalla. En cada prenda se indican las tallas y colores disponibles.</li>
             <li>La compra está sujeta al stock disponible al momento de confirmar el pedido. Si por un error excepcional no pudiéramos entregar una prenda ya pagada, te lo informaremos y te devolveremos el monto pagado por ella.</li>
             <li>Si un precio se publica con un error evidente, te avisaremos antes de despachar y podrás confirmar la compra al precio correcto o anularla con devolución total.</li>
@@ -44,21 +44,21 @@
         <h2 class="tz-label mt-5 mb-3">4. Pedidos y medios de pago</h2>
         <ul>
             <li><strong>Tarjeta de crédito o débito:</strong> el pago lo procesa Mercado Pago en su propia plataforma. TEZAN no recibe ni guarda los datos de tu tarjeta.</li>
-            <li><strong>Yape o Plin:</strong> al confirmar el pedido te mostramos el monto exacto y el número de destino, y te lo enviamos por correo. Las prendas quedan reservadas mientras validamos tu pago.</li>
+            <li><strong>Yape o Plin:</strong> al confirmar el pedido te mostramos el monto exacto y el número de destino, y te lo enviamos por correo. Las prendas quedan reservadas durante {{ config('tienda.horas_para_pagar') }} horas.</li>
             <li>El pedido queda confirmado cuando el pago es aprobado por Mercado Pago o validado por TEZAN; te avisaremos por correo.</li>
-            <li>Si un pedido con Yape o Plin no se paga en un plazo razonable, podremos cancelarlo y liberar las prendas reservadas. Te avisaremos antes de hacerlo.</li>
+            <li>Si un pedido no se paga dentro de {{ config('tienda.horas_para_pagar') }} horas, se cancela automáticamente, las prendas se liberan y te avisamos por correo. Si tu pago llega después y aún hay stock, reactivamos el pedido; si no lo hay, te devolvemos el monto pagado.</li>
         </ul>
 
         <h2 class="tz-label mt-5 mb-3">5. Comprobante de pago</h2>
         <p>
-            Por cada compra emitimos el comprobante de pago electrónico que corresponda según las normas de la SUNAT.
+            Por cada compra emitimos boleta o factura electrónica, según las normas de la SUNAT.
             Si necesitas factura, escríbenos con tu número de RUC antes de pagar.
         </p>
 
         <h2 class="tz-label mt-5 mb-3">6. Envíos y entrega</h2>
         <ul>
             <li>Despachamos a todo el Perú. El envío cuesta S/ {{ $envio }} y es gratis en compras desde S/ {{ $envioGratis }}.</li>
-            <li>Te informaremos el plazo estimado de entrega al confirmar tu pedido, según tu ciudad o distrito. Si no cumplimos el plazo informado, puedes pedir la anulación del pedido y la devolución de lo pagado.</li>
+            <li>Desde que confirmamos tu pago, entregamos en Lima {{ config('tienda.entrega_lima') }} y en provincias {{ config('tienda.entrega_provincias') }}. Si no cumplimos el plazo, puedes pedir la anulación del pedido y la devolución de lo pagado.</li>
             <li>Debes indicar una dirección y un teléfono correctos. Si la entrega no es posible por datos errados o ausencia, coordinaremos contigo un nuevo intento.</li>
         </ul>
 

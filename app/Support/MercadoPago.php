@@ -61,6 +61,10 @@ class MercadoPago
             'external_reference' => $order->reference_number,
             'statement_descriptor' => 'TEZAN',
             'back_urls' => ['success' => $returnUrl, 'failure' => $returnUrl, 'pending' => $returnUrl],
+            // El enlace deja de servir cuando vence el tiempo para pagar
+            'expires' => true,
+            'expiration_date_to' => $order->paymentDeadline()->toIso8601String(),
+            'date_of_expiration' => $order->paymentDeadline()->toIso8601String(),
         ];
 
         // Mercado Pago solo acepta volver solo y avisar por webhook a direcciones públicas con https
@@ -121,8 +125,14 @@ class MercadoPago
                     Log::warning("Mercado Pago: el pago {$payment['id']} no coincide con el total del pedido {$order->reference_number}");
                 } elseif ($order->payment_status !== 'paid') {
                     $changes['payment_status'] = 'paid';
-                    $changes['status'] = $order->status === 'pending' ? 'processing' : $order->status;
-                    $justConfirmed = true;
+
+                    // Pago tardío: el pedido ya estaba cancelado y su stock se había liberado
+                    if ($order->status === 'cancelled' && ! $order->load('items')->reserveStock()) {
+                        Log::error("Mercado Pago: pago {$payment['id']} recibido para el pedido cancelado {$order->reference_number} sin stock disponible. Requiere devolución.");
+                    } else {
+                        $changes['status'] = in_array($order->status, ['pending', 'cancelled'], true) ? 'processing' : $order->status;
+                        $justConfirmed = true;
+                    }
                 }
             } elseif (in_array($status, ['rejected', 'cancelled'], true) && $order->payment_status === 'unpaid') {
                 $changes['payment_status'] = 'failed'; // El cliente puede reintentar desde su pedido

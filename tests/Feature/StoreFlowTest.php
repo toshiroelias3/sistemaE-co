@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\ComplaintRegistered;
+use App\Mail\OrderExpired;
 use App\Mail\OrderPlaced;
 use App\Mail\PaymentConfirmed;
 use App\Models\Category;
@@ -520,6 +521,8 @@ class StoreFlowTest extends TestCase
 
         Http::assertSent(fn ($request) => $request->url() === 'https://api.mercadopago.com/checkout/preferences'
             && $request['external_reference'] === $order->reference_number
+            && $request['expires'] === true
+            && $request['date_of_expiration'] === $order->paymentDeadline()->toIso8601String()
             && collect($request['items'])->sum(fn ($item) => $item['unit_price'] * $item['quantity']) == 132.0 // 120 + 12 de envío
             && collect($request['items'])->every(fn ($item) => $item['currency_id'] === 'PEN'));
 
@@ -595,6 +598,109 @@ class StoreFlowTest extends TestCase
 
         $this->get(route('checkout.index'))->assertDontSee('value="mercadopago"', false);
         $this->post(route('checkout.store'), ['payment_method' => 'mercadopago'])->assertSessionHasErrors('payment_method');
+    }
+
+    public function test_seeding_again_keeps_the_admin_password(): void
+    {
+        $this->assertFalse(Hash::check('admin1234', $this->admin()->password));
+
+        $this->admin()->update(['password' => Hash::make('una-clave-propia-larga')]);
+        $this->seed(InitialStoreSeeder::class);
+
+        $this->assertTrue(Hash::check('una-clave-propia-larga', $this->admin()->password));
+    }
+
+    public function test_expired_unpaid_orders_are_cancelled_and_restocked(): void
+    {
+        Mail::fake();
+
+        $this->addToCart(1);
+        $expired = $this->checkout();
+        $this->addToCart(1);
+        $paid = $this->checkout();
+        $paid->update(['payment_status' => 'paid']);
+
+        $this->travel(config('tienda.horas_para_pagar') + 1)->hours();
+
+        $this->addToCart(1);
+        $recent = $this->checkout();
+
+        $this->artisan('orders:cancel-unpaid')->assertSuccessful();
+
+        $this->assertSame('cancelled', $expired->refresh()->status);
+        $this->assertSame('pending', $paid->refresh()->status);
+        $this->assertSame('pending', $recent->refresh()->status);
+        $this->assertSame(3, $this->product->variants()->first()->stock);
+        Mail::assertSent(OrderExpired::class, 1);
+        Mail::assertSent(OrderExpired::class, fn ($mail) => $mail->order->is($expired));
+
+        $this->artisan('orders:cancel-unpaid')->assertSuccessful();
+        Mail::assertSent(OrderExpired::class, 1);
+    }
+
+    public function test_expiring_order_with_an_approved_payment_is_confirmed_not_cancelled(): void
+    {
+        Mail::fake();
+        $order = $this->mercadoPagoOrder('approved');
+        $order->update(['mp_payment_id' => '555']);
+
+        $this->travel(config('tienda.horas_para_pagar') + 1)->hours();
+        $this->artisan('orders:cancel-unpaid')->assertSuccessful();
+
+        $order->refresh();
+        $this->assertSame('paid', $order->payment_status);
+        $this->assertSame('processing', $order->status);
+        $this->assertSame(4, $this->product->variants()->first()->stock);
+        Mail::assertNotSent(OrderExpired::class);
+    }
+
+    public function test_late_payment_reactivates_a_cancelled_order_when_stock_remains(): void
+    {
+        Mail::fake();
+        $order = $this->mercadoPagoOrder('approved');
+        $this->travel(config('tienda.horas_para_pagar') + 1)->hours();
+        $this->artisan('orders:cancel-unpaid')->assertSuccessful();
+        $this->assertSame(5, $this->product->variants()->first()->stock);
+
+        $this->postJson(route('webhooks.mercadopago').'?data.id=555&type=payment', ['type' => 'payment', 'data' => ['id' => '555']])->assertOk();
+
+        $order->refresh();
+        $this->assertSame('paid', $order->payment_status);
+        $this->assertSame('processing', $order->status);
+        $this->assertSame(4, $this->product->variants()->first()->stock);
+        Mail::assertSent(PaymentConfirmed::class, 1);
+    }
+
+    public function test_late_payment_without_stock_stays_cancelled_and_alerts_the_admin(): void
+    {
+        Mail::fake();
+        $order = $this->mercadoPagoOrder('approved');
+        $this->travel(config('tienda.horas_para_pagar') + 1)->hours();
+        $this->artisan('orders:cancel-unpaid')->assertSuccessful();
+        $this->product->variants()->update(['stock' => 0]);
+
+        $this->postJson(route('webhooks.mercadopago').'?data.id=555&type=payment', ['type' => 'payment', 'data' => ['id' => '555']])->assertOk();
+
+        $order->refresh();
+        $this->assertSame('paid', $order->payment_status);
+        $this->assertSame('cancelled', $order->status);
+        $this->assertSame(0, $this->product->variants()->first()->stock);
+        Mail::assertNotSent(PaymentConfirmed::class);
+        $this->actingAs($this->admin())->get(route('admin.dashboard'))->assertSee('1 pago tardío');
+    }
+
+    public function test_confirmation_shows_the_payment_deadline_and_delivery_times(): void
+    {
+        Mail::fake();
+        $this->addToCart(1);
+        $order = $this->checkout();
+        $deadline = $order->paymentDeadline()->timezone('America/Lima')->format('d/m/Y');
+
+        $this->get(route('checkout.success', $order->reference_number))
+            ->assertOk()
+            ->assertSee($deadline)
+            ->assertSee(config('tienda.entrega_lima'))
+            ->assertSee(config('tienda.entrega_provincias'));
     }
 
     public function test_clients_cannot_open_the_admin_panel(): void

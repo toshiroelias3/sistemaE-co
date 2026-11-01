@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
-use App\Models\Size;
 use App\Models\Color;
-use App\Models\Category;
+use App\Models\Size;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -14,13 +13,20 @@ class InitialStoreSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Crear Usuario Administrador de Prueba
-        // 'role' no es asignable masivamente, por eso se usa forceFill
-        User::firstOrNew(['email' => 'admin@tezan.com'])->forceFill([
-            'name' => 'Admin Tezan',
-            'password' => Hash::make('admin1234'), // Contraseña segura temporal
-            'role' => 'admin',
-        ])->save();
+        // 1. Crear el administrador solo si no existe: nunca se pisa una clave ya cambiada
+        $admin = User::firstOrNew(['email' => 'admin@tezan.com']);
+        if (! $admin->exists) {
+            $password = config('tienda.admin_password') ?: Str::password(20);
+
+            // 'role' no es asignable masivamente, por eso se usa forceFill
+            $admin->forceFill([
+                'name' => 'Admin Tezan',
+                'password' => Hash::make($password),
+                'role' => 'admin',
+            ])->save();
+
+            $this->command?->warn("Admin creado: admin@tezan.com / {$password}");
+        }
 
         // 2. Insertar Tallas Base
         $sizes = ['S', 'M', 'L', 'XL'];
@@ -34,7 +40,7 @@ class InitialStoreSeeder extends Seeder
             ['name' => 'Navy Blue', 'hex' => '#000080'],
             ['name' => 'Military Green', 'hex' => '#4B5320'],
             ['name' => 'Black', 'hex' => '#000000'],
-            ['name' => 'Off-White', 'hex' => '#F8F9FA']
+            ['name' => 'Off-White', 'hex' => '#F8F9FA'],
         ];
         foreach ($colors as $color) {
             Color::firstOrCreate(['name' => $color['name']], ['hex_code' => $color['hex']]);

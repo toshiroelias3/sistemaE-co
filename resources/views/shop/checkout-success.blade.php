@@ -14,10 +14,14 @@
                     <i class="bi bi-check-lg fs-1"></i>
                 </div>
                 <h1 class="mb-2">¡Gracias por tu compra!</h1>
-                @if($order->payment_status === 'paid')
+                @if($order->status === 'cancelled')
+                    <p class="text-muted lead">Este pedido fue cancelado. Si tienes dudas, escríbenos a {{ config('tienda.email') }}.</p>
+                @elseif($order->payment_status === 'paid')
                     <p class="text-muted lead">Tu pago está confirmado y ya estamos preparando tu pedido.</p>
+                    <p class="small text-muted">Entrega: Lima {{ config('tienda.entrega_lima') }}; provincias {{ config('tienda.entrega_provincias') }}.</p>
                 @else
-                    <p class="text-muted lead">Tu pedido está reservado. Completa el pago para que lo preparemos.</p>
+                    <p class="text-muted lead">Tu pedido está reservado. Completa el pago antes del {{ $order->paymentDeadline()->timezone('America/Lima')->format('d/m/Y \a \l\a\s H:i') }}.</p>
+                    <p class="small text-muted">Después de pagar, entregamos en Lima {{ config('tienda.entrega_lima') }} y en provincias {{ config('tienda.entrega_provincias') }}.</p>
                 @endif
                 <div class="badge bg-light text-dark border p-2 px-3">
                     N.° de pedido: {{ $order->reference_number }}

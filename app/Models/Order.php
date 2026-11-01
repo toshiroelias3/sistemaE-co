@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -72,6 +73,48 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Momento en que vence el tiempo para pagar el pedido
+     */
+    public function paymentDeadline(): CarbonInterface
+    {
+        return $this->created_at->copy()->addHours(config('tienda.horas_para_pagar'));
+    }
+
+    /**
+     * Devuelve las prendas al inventario. Debe llamarse dentro de una transacción.
+     */
+    public function releaseStock(): void
+    {
+        foreach ($this->items as $item) {
+            ProductVariant::lockForUpdate()->find($item->product_variant_id)?->increment('stock', $item->quantity);
+        }
+    }
+
+    /**
+     * Vuelve a reservar las prendas de un pedido cancelado. Si falta stock de alguna,
+     * no reserva ninguna y devuelve false. Debe llamarse dentro de una transacción.
+     */
+    public function reserveStock(): bool
+    {
+        $variants = ProductVariant::whereIn('id', $this->items->pluck('product_variant_id'))
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
+
+        foreach ($this->items as $item) {
+            if (($variants[$item->product_variant_id]->stock ?? 0) < $item->quantity) {
+                return false;
+            }
+        }
+
+        foreach ($this->items as $item) {
+            $variants[$item->product_variant_id]->decrement('stock', $item->quantity);
+        }
+
+        return true;
     }
 
     /**

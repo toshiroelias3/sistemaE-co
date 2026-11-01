@@ -4,7 +4,7 @@ Guía paso a paso para poner la tienda en internet. Marca cada casilla al comple
 
 ## 1. Antes de publicar (en tu computadora)
 
-- [ ] **Cambiar la contraseña del admin.** Hoy es `admin1234` (el panel muestra una alerta roja mientras siga así):
+- [ ] **Usar una contraseña de admin larga y única.** Para cambiarla:
   ```bash
   php artisan tinker
   >>> User::where('email', 'admin@tezan.com')->first()->update(['password' => 'UnaClaveLargaYSegura']);
@@ -47,19 +47,23 @@ composer install --no-dev --optimize-autoloader
 cp .env.production.example .env        # y completar los <...>
 php artisan key:generate
 php artisan migrate --force
-php artisan db:seed --class=InitialStoreSeeder --force   # solo la primera vez (tallas, colores, categorías, admin)
+php artisan db:seed --class=InitialStoreSeeder --force   # tallas, colores, categorías y admin (si no existe)
 php artisan storage:link
 npm ci && npm run build
 php artisan images:optimize
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 ```
 
-Si el seeder crea el admin en producción, **cámbiale la contraseña de inmediato** (paso 1).
+El seeder crea el admin solo si no existe y nunca cambia una clave existente. Usa `ADMIN_INITIAL_PASSWORD` si está definida; si no, genera una al azar y la muestra una sola vez en la terminal.
 
 Las fotos de productos viven en `storage/app/public/products`. Si ya cargaste prendas en local, copia esa carpeta al servidor y exporta/importa la base de datos (phpMyAdmin o `mysqldump`).
 
 ## 4. Tareas automáticas
 
+- **Programador de Laravel (obligatorio).** Sin este cron, los pedidos sin pagar no se cancelan solos y sus prendas siguen reservadas:
+  ```
+  * * * * * cd /ruta/a/tezan && php artisan schedule:run >> /dev/null 2>&1
+  ```
 - **Copias de seguridad diarias** de la base de datos y de `storage/app/public` (la mayoría de paneles lo ofrece; si no, un cron con `mysqldump`).
 - Si en el futuro se usan colas: `php artisan queue:work` como servicio. Hoy los correos se envían al momento y no hace falta.
 

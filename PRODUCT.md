@@ -33,7 +33,8 @@ Prendas hechas en Perú, con telas de calidad y buen fit, a precio accesible, de
 - Estética "old money" / atemporal: es identidad de marca y debe mantenerse.
 - La tienda debe leerse de inmediato como un e-commerce de moda convencional, con Zara como referencia de nivel (preferencia confirmada el 2026-10-20, tras descartar una dirección conceptual "Damero limeño"). Lo que se descartó: el blanco y negro plano y la portada tipo póster con la marca gigante. La calidez viene de la fotografía.
 - Existe un logo propio. **Pendiente:** el archivo aún no está en el repositorio; hoy el sitio usa la palabra "TEZAN" en texto.
-- Contacto: tezancompany@gmail.com; WhatsApp y Yape 942 817 550 (titular TEZAN S.A.C.). RUC 20616005163, Av. Lima 767.
+- Contacto: tezancompany@gmail.com; WhatsApp y Yape 942 817 550 (titular actual: Eva Chanzapa Marin). RUC 20616005163, Av. Lima 767, Lima Centro.
+- Entrega: Lima dentro de las 12 horas, provincias de 1 a 2 días, contados desde que se confirma el pago. 24 horas para pagar. Precios con IGV; se emite boleta o factura.
 - Pago (desde 2026-10-25): tarjeta vía Mercado Pago (se confirma solo) y Yape o Plin al mismo número 942 817 550 (confirmación manual del admin). Los pedidos nacen "pendiente" + "por pagar".
 
 ## Evidence on Hand

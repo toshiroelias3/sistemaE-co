@@ -8,6 +8,9 @@
     $free = number_format(\App\Support\Cart::FREE_SHIPPING_FROM, 0);
     $faqs = [
         ['¿Cuánto cuesta el envío?', "El envío cuesta S/ {$ship} y es gratis en compras desde S/ {$free}. Despachamos a todo el Perú."],
+        ['¿Cuánto demora la entrega?', 'Desde que confirmamos tu pago, entregamos en Lima ' . config('tienda.entrega_lima') . ' y en provincias ' . config('tienda.entrega_provincias') . '.'],
+        ['¿Cuánto tiempo tengo para pagar?', 'Tienes ' . config('tienda.horas_para_pagar') . ' horas desde que haces el pedido. Después se cancela y las prendas vuelven a estar disponibles.'],
+        ['¿Los precios incluyen IGV?', 'Sí. Todos los precios incluyen IGV y emitimos boleta o factura electrónica.'],
         ['¿Qué medios de pago aceptan?', 'Puedes pagar con tarjeta de crédito o débito a través de Mercado Pago (tu pedido se confirma al instante), o con Yape o Plin: te mostramos el monto y el número, nos envías la captura por WhatsApp y validamos el pago.'],
         ['¿Necesito una cuenta para comprar?', 'No. Puedes comprar como invitado. Si creas una cuenta, verás todos tus pedidos en «Mis pedidos».'],
         ['¿Cómo sigo mi pedido?', 'Al comprar recibes un número de pedido que empieza con TZN. Si compraste con tu cuenta, en «Mis pedidos» ves su estado: procesando, en ruta o entregado.'],

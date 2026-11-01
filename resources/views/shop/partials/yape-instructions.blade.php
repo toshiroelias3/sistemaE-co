@@ -29,5 +29,5 @@
             @endif
         </div>
     </div>
-    <p class="small text-muted mt-3 mb-0">Separamos tus prendas mientras validamos el pago. Te avisaremos por correo cuando lo confirmemos.</p>
+    <p class="small text-muted mt-3 mb-0">Separamos tus prendas durante {{ config('tienda.horas_para_pagar') }} horas; si no recibimos el pago, el pedido se cancela. Te avisaremos por correo cuando lo confirmemos.</p>
 </div>

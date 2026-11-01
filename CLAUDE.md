@@ -13,9 +13,10 @@ composer setup                 # first-time install: deps, .env, key, migrate, n
 composer dev                   # runs artisan serve + queue:listen + pail logs + vite concurrently
 npm run dev / npm run build    # Vite only
 php artisan migrate
-php artisan db:seed --class=InitialStoreSeeder   # admin user (admin@tezan.com / admin1234) + catalog base data
+php artisan db:seed --class=InitialStoreSeeder   # catalog base data + admin@tezan.com if missing (ADMIN_INITIAL_PASSWORD or a random password, printed once)
 php artisan storage:link       # required for product images (public/storage -> storage/app/public)
 php artisan images:optimize    # generate 400/800/1200px WebP versions for existing product photos (--force to redo)
+php artisan orders:cancel-unpaid   # cancel expired unpaid orders (scheduled every 15 min; production needs the schedule:run cron)
 
 composer test                  # clears config cache, then php artisan test
 php artisan test --filter=SomeTest               # single test class/method
@@ -26,8 +27,7 @@ vendor/bin/pint                # code style (Laravel Pint)
 - The local XAMPP PHP (`C:\xampp\php83`) does not enable `pdo_sqlite`, and `php artisan test` spawns a subprocess that drops `-d` flags. Run tests with:
   `php -d extension_dir=C:/xampp/php83/ext -d extension=pdo_sqlite vendor/phpunit/phpunit/phpunit [--filter=name]`
 - End-to-end store/admin flows are covered in `tests/Feature/StoreFlowTest.php`.
-- Outbound https (Mercado Pago, Gmail) from the local XAMPP PHP needs a CA bundle: `curl.cainfo`/`openssl.cafile` in `C:
-mpp\php83\php.ini` point to `C:/xampp/php83/extras/ssl/cacert.pem` (from https://curl.se/ca/cacert.pem). A `cURL error 60` means that setting is missing.
+- Outbound https (Mercado Pago, Gmail) from the local XAMPP PHP needs a CA bundle: `curl.cainfo`/`openssl.cafile` in `C:\xampp\php83\php.ini` point to `C:/xampp/php83/extras/ssl/cacert.pem` (from https://curl.se/ca/cacert.pem). A `cURL error 60` means that setting is missing.
 
 ## Architecture
 
@@ -39,9 +39,9 @@ mpp\php83\php.ini` point to `C:/xampp/php83/extras/ssl/cacert.pem` (from https:/
 
 **Catalog model** — `Product` has many `ProductVariant`s; a variant is the unique (product, `Size`, `Color`) combination and holds `sku` and `stock`. Price lives on the product (`base_price`), not the variant. `Category` is self-referencing via `parent_id` (parent/children). `ProductImage` rows store paths on the `public` disk (`products/...`) with one `is_primary` flag; render with `asset('storage/'.$path)`. Colors can be created inline from the product form via an AJAX endpoint. Uploads also get WebP derivatives (`App\Support\ProductImages`, needs PHP GD — enabled in the local XAMPP php.ini); render photos with `$image->url($width)` / `$image->srcset()`, which fall back to the original when no derivatives exist.
 
-**Store settings** — `config/tienda.php` reads `TIENDA_*` from `.env` (razón social, RUC, dirección, email, WhatsApp, social URLs). Anything that depends on a setting (WhatsApp button, social icons, RUC in the footer/complaint sheet) only renders when it is set — never hardcode these values in views.
+**Store settings** — `config/tienda.php` reads `TIENDA_*` from `.env` (razón social, RUC, dirección, email, WhatsApp, social URLs, delivery times `entrega_lima`/`entrega_provincias`). Anything that depends on a setting (WhatsApp button, social icons, RUC in the footer/complaint sheet) only renders when it is set — never hardcode these values in views.
 
-**Payments** — two methods (`Order::PAYMENT_METHODS`, stored in `orders.payment_method`): `mercadopago` (Checkout Pro) and `yape` (Yape **or** Plin, same number `config('tienda.yape')`, validated manually). Every order is created `pending` + `unpaid` with stock reserved, and the customer gets `App\Mail\OrderPlaced`. Mercado Pago lives in `App\Support\MercadoPago` (plain REST via the HTTP client, no SDK): `createPreference()` sends the customer to the `init_point`; `syncPayment()` **always re-queries `/v1/payments/{id}`** (never trust return-URL params), checks PEN + amount, and on approval marks the order paid/processing and sends `PaymentConfirmed` once (row lock, idempotent). Entry points: webhook `POST /webhooks/mercadopago` (CSRF-exempt, verifies `x-signature` when `MERCADOPAGO_WEBHOOK_SECRET` is set), return URL `checkout.mercadopago.return`, and retry `checkout.mercadopago.pay`. The MP option only renders when `MERCADOPAGO_ACCESS_TOKEN` is set. For Yape/Plin the admin switches `payment_status` to `paid`, which sends `PaymentConfirmed`. Mail failures are logged, never fatal. Tests fake MP with `Http::fake` + `preventStrayRequests`.
+**Payments** — two methods (`Order::PAYMENT_METHODS`, stored in `orders.payment_method`): `mercadopago` (Checkout Pro) and `yape` (Yape **or** Plin, same number `config('tienda.yape')`, validated manually). Every order is created `pending` + `unpaid` with stock reserved, and the customer gets `App\Mail\OrderPlaced`. Mercado Pago lives in `App\Support\MercadoPago` (plain REST via the HTTP client, no SDK): `createPreference()` sends the customer to the `init_point`; `syncPayment()` **always re-queries `/v1/payments/{id}`** (never trust return-URL params), checks PEN + amount, and on approval marks the order paid/processing and sends `PaymentConfirmed` once (row lock, idempotent). Entry points: webhook `POST /webhooks/mercadopago` (CSRF-exempt, verifies `x-signature` when `MERCADOPAGO_WEBHOOK_SECRET` is set), return URL `checkout.mercadopago.return`, and retry `checkout.mercadopago.pay`. The MP option only renders when `MERCADOPAGO_ACCESS_TOKEN` is set. For Yape/Plin the admin switches `payment_status` to `paid`, which sends `PaymentConfirmed`. Unpaid orders expire after `config('tienda.horas_para_pagar')` hours: `orders:cancel-unpaid` re-checks MP, restocks and sends `OrderExpired`, and the MP preference expires at the same time. A late approved payment on a cancelled order re-reserves stock and reactivates it; without stock it stays `cancelled` + `paid` and the dashboard asks for a manual refund. Mail failures are logged, never fatal. Tests fake MP with `Http::fake` + `preventStrayRequests`.
 
 **Security** — `App\Http\Middleware\SecurityHeaders` (appended globally) sets nosniff, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy, HSTS on https, and a CSP (skipped only in `local` while `public/hot` exists). If you add an external script/style/font/image host, add it to the CSP. When passing flags to `@json` inside `<script>`, always include `JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT` (custom flags replace Blade's safe defaults). Login/register/reset/complaints are throttled 5/min, checkout 10/min, cart 60/min; failed logins are logged.
 

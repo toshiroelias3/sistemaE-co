@@ -13,6 +13,13 @@
     </div>
 @endif
 
+@if($refundsNeeded)
+    <div class="alert alert-danger rounded-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span><i class="bi bi-arrow-counterclockwise me-2"></i><strong>{{ $refundsNeeded }} {{ $refundsNeeded === 1 ? 'pago tardío' : 'pagos tardíos' }}</strong> de Mercado Pago en pedidos cancelados y sin stock: devuelve el dinero desde tu cuenta y márcalos como reembolsados.</span>
+        <a href="{{ route('admin.orders.index', ['status' => 'cancelled']) }}" class="btn btn-sm btn-dark rounded-0">Ver pedidos</a>
+    </div>
+@endif
+
 @if($pendingPayments)
     <div class="alert alert-warning rounded-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
         <span><i class="bi bi-phone me-2"></i><strong>{{ $pendingPayments }} {{ $pendingPayments === 1 ? 'pedido espera' : 'pedidos esperan' }}</strong> que valides su pago por Yape o Plin.</span>

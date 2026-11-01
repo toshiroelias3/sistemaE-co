@@ -16,13 +16,14 @@
             </tbody>
         </table>
         <p>Despachamos a todo el Perú. El costo de envío se muestra en tu bolsa y en el checkout antes de pagar.</p>
+        <p>Desde que confirmamos tu pago, entregamos en Lima {{ config('tienda.entrega_lima') }} y en provincias {{ config('tienda.entrega_provincias') }}.</p>
 
         <h2 class="tz-label mt-5 mb-3">Pagos</h2>
         <ul>
             <li><strong>Tarjeta de crédito o débito</strong> a través de Mercado Pago: pagas en su página segura y tu pedido se confirma al instante.</li>
-            <li><strong>Yape o Plin</strong>: al confirmar tu pedido te mostramos el monto exacto y el número. Envíanos la captura por WhatsApp con tu número de pedido; separamos tus prendas mientras validamos el pago.</li>
+            <li><strong>Yape o Plin</strong>: al confirmar tu pedido te mostramos el monto exacto y el número. Envíanos la captura por WhatsApp con tu número de pedido; separamos tus prendas durante {{ config('tienda.horas_para_pagar') }} horas.</li>
         </ul>
-        <p>Todos los precios están en soles (S/).</p>
+        <p>Todos los precios están en soles (S/) e incluyen IGV. Emitimos boleta o factura electrónica.</p>
 
         <h2 class="tz-label mt-5 mb-3">Seguimiento</h2>
         <p>Al comprar recibes un número de pedido que empieza con TZN. Si compraste con tu cuenta, puedes ver el estado en <a href="{{ route('customer.orders.index') }}">Mis pedidos</a>.</p>

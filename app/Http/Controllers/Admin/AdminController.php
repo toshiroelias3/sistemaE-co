@@ -37,7 +37,11 @@ class AdminController extends Controller
         $pendingPayments = Order::where('payment_method', 'yape')->where('payment_status', 'unpaid')->where('status', '!=', 'cancelled')->count();
         $usesDefaultPassword = Hash::check('admin1234', auth()->user()->password);
 
+        // Pagos de Mercado Pago que llegaron tarde y sin stock: hay que devolver el dinero
+        $refundsNeeded = Order::where('payment_method', 'mercadopago')->where('payment_status', 'paid')->where('status', 'cancelled')->count();
+
         return view('admin.dashboard', compact(
+            'refundsNeeded',
             'pendingPayments',
             'usesDefaultPassword',
             'totalProducts',
